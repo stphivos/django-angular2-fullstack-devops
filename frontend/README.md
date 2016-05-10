@@ -1,5 +1,7 @@
 # Frontend
 
+Based on [mgechev/angular2-seed](https://github.com/mgechev/angular2-seed).
+
 Provides fast, reliable and extensible starter for the development of Angular 2 projects.
 
 `angular2-seed` provides the following features:
