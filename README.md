@@ -32,6 +32,8 @@ $ vagrant up
 $ vagrant ssh
 ```
 
+Note: All project dependencies are automatically installed by provisioning so you can start hacking immediately.
+
 ### Frontend
 ```bash
 $ cd frontend
