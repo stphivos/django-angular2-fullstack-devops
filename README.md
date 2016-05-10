@@ -37,14 +37,14 @@ $ vagrant ssh
 $ cd frontend
 $ npm start
 ```
-[More..](frontend/)
+[README..](frontend/README.md)
 
 ### Backend
 ```bash
 $ cd backend
 $ ./manage.py runserver
 ```
-[More..](backend/)
+[README..](backend/README.md)
 
 ## Credits
 * Frontend seed - slightly modified version of [mgechev/angular2-seed](https://github.com/mgechev/angular2-seed)
