@@ -20,6 +20,32 @@ All-in-one fill-in-the-blanks django/angular2 environment seed
 * PostgreSQL 9.4
 * Django REST Framework 3.3
 
+## Requirements
+* [Vagrant](https://www.vagrantup.com/docs/installation/)
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+
+## Setup
+```bash
+$ git clone https://github.com/stphivos/django-angular2-fullstack-compact
+$ cd django-angular2-fullstack-compact
+$ vagrant up
+$ vagrant ssh
+```
+
+### Frontend
+```bash
+$ cd frontend
+$ npm start
+```
+[More..](frontend/)
+
+### Backend
+```bash
+$ cd backend
+$ ./manage.py runserver
+```
+[More..](backend/)
+
 ## Credits
 * Frontend seed - slightly modified version of [mgechev/angular2-seed](https://github.com/mgechev/angular2-seed)
 * Vagrant provisioning - script based on [jackdb/pg-app-dev-vm](https://github.com/jackdb/pg-app-dev-vm)
