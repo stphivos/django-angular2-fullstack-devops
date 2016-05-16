@@ -71,11 +71,13 @@ echo "##### UPGRADE #####"
 apt-get update
 apt-get -y upgrade
 
+# Make sure we get UTF-8
+locale-gen en_US.UTF-8
+update-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
 echo "##### Backend #####"
 
 echo "Installing PostgreSQL..."
-locale-gen en_US.UTF-8
-dpkg-reconfigure locales
 apt-get -y install "postgresql-$PG_VERSION" "postgresql-contrib-$PG_VERSION"
 
 PG_CONF="/etc/postgresql/$PG_VERSION/main/postgresql.conf"
