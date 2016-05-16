@@ -1,10 +1,11 @@
 #!/bin/sh -e
 
-APP_ROOT_NAME=fullstack
+APP_ROOT_NAME=backend
 
 APP_DB_USER=backend
 APP_DB_PASS=!qwerty1
-APP_BACKEND_NAME=$APP_DB_USER
+APP_DB_PORT=15432
+APP_BACKEND_NAME=backend
 APP_FRONTEND_NAME=frontend
 
 USER_HOME=/home/vagrant
@@ -18,10 +19,10 @@ PG_VERSION=9.4
 # Changes below this line are probably not necessary
 ###########################################################
 print_db_usage () {
-  echo "Your PostgreSQL database has been setup and can be accessed on your local machine on the forwarded port (default: 15432)"
+  echo "Your PostgreSQL database has been setup and can be accessed on your local machine on the forwarded port (default: $APP_DB_PORT)"
   echo "  Host: localhost"
-  echo "  Port: 15432"
-  echo "  Database: $APP_BACKEND_NAME"
+  echo "  Port: $APP_DB_PORT"
+  echo "  Database: $APP_ROOT_NAME"
   echo "  Username: $APP_DB_USER"
   echo "  Password: $APP_DB_PASS"
   echo ""
@@ -32,13 +33,13 @@ print_db_usage () {
   echo "psql access to app database user via VM:"
   echo "  vagrant ssh"
   echo "  sudo su - postgres"
-  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost $APP_BACKEND_NAME"
+  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost $APP_ROOT_NAME"
   echo ""
   echo "Env variable for application development:"
-  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:15432/$APP_BACKEND_NAME"
+  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:$APP_DB_PORT/$APP_ROOT_NAME"
   echo ""
   echo "Local command to access the database via psql:"
-  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p 15432 $APP_BACKEND_NAME"
+  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p $APP_DB_PORT $APP_ROOT_NAME"
 }
 
 export DEBIAN_FRONTEND=noninteractive
@@ -63,10 +64,15 @@ then
   wget --quiet -O - https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
 fi
 
+echo "##### UPGRADE #####"
+
 # Update package list and upgrade all packages
 apt-get update
 apt-get -y upgrade
 
+echo "##### Backend #####"
+
+echo "Installing PostgreSQL..."
 apt-get -y install "postgresql-$PG_VERSION" "postgresql-contrib-$PG_VERSION"
 
 PG_CONF="/etc/postgresql/$PG_VERSION/main/postgresql.conf"
@@ -90,53 +96,55 @@ cat << EOF | su - postgres -c psql
 CREATE USER $APP_DB_USER WITH PASSWORD '$APP_DB_PASS';
 
 -- Create the database:
-CREATE DATABASE $APP_BACKEND_NAME WITH OWNER=$APP_DB_USER
-                                  LC_COLLATE='en_US.utf8'
-                                  LC_CTYPE='en_US.utf8'
-                                  ENCODING='UTF8'
-                                  TEMPLATE=template0;
+CREATE DATABASE $APP_ROOT_NAME  WITH OWNER=$APP_DB_USER
+                                LC_COLLATE='en_US.utf8'
+                                LC_CTYPE='en_US.utf8'
+                                ENCODING='UTF8'
+                                TEMPLATE=template0;
 
 -- Make superuser (We want this user to be able to create test databases - dev envs only!):
-ALTER USER backend WITH SUPERUSER;
+ALTER USER $APP_DB_USER WITH SUPERUSER;
 EOF
 
-echo "Successfully installed PostgreSQL."
 print_db_usage
 
-echo "Installing Git.."
+echo "Installing Git..."
 apt-get -y install git
 
-echo "Installing Node.js.."
-curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
-apt-get install -y nodejs
-apt-get install -y build-essential
-
-echo "Installing and upgrading pip.."
+echo "Installing python setuptools..."
 apt-get -y install python-setuptools
 easy_install -U pip
 
-echo "Installing required packages for python package 'psycopg2'.."
+echo "Installing required packages for python package 'psycopg2'..."
 apt-get -y install python-dev python3-dev libpq-dev
 
-echo "Installing virtualenvwrapper from pip.."
+echo "Installing virtualenvwrapper..."
 pip install virtualenvwrapper
 
-echo "Setup virtualenvwrapper"
+echo "Setting up virtual environment..."
+echo "" >> ${USER_HOME}/.bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> ${USER_HOME}/.bashrc
 echo "cd $PROJECT_ROOT_DIR" >> ${USER_HOME}/.bashrc
-echo "workon $APP_BACKEND_NAME" >> ${USER_HOME}/.bashrc
-echo "export DJANGO_SETTINGS_MODULE=$APP_BACKEND_NAME.settings" >> ${USER_HOME}/.bashrc
+echo "workon $APP_ROOT_NAME" >> ${USER_HOME}/.bashrc
+echo "export DJANGO_SETTINGS_MODULE=$APP_ROOT_NAME.settings" >> ${USER_HOME}/.bashrc
 
-echo "Install the backend environment.."
+echo "Setting up django project requirements..."
 sudo su - vagrant /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh; \
                                 cd ${PROJECT_BACKEND_DIR}; \
-                                mkvirtualenv --python=`which python` $APP_BACKEND_NAME; \
+                                mkvirtualenv --python=`which python` $APP_ROOT_NAME; \
                                 pip install -r requirements/requirements-dev.txt; \
                                 python manage.py makemigrations; \
                                 python manage.py migrate; \
                                 deactivate;"
 
-echo "Install the frontend environment.."
+echo "##### Frontend #####"
+
+echo "Installing Node.js..."
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+apt-get install -y nodejs
+apt-get install -y build-essential
+
+echo "Installing Node modules..."
 sudo su - vagrant /bin/bash -c "cd ${PROJECT_FRONTEND_DIR}; \
                                 npm install;"
 
