@@ -1,9 +1,10 @@
 #!/bin/sh -e
 
-APP_ROOT_NAME=backend
+APP_NAME=backend  # db name, virtual env name, django settings name, django default db settings
+APP_ROOT_NAME=fullstack  # vagrant sync dir, box hostname
 
-APP_DB_USER=backend
-APP_DB_PASS=!qwerty1
+APP_DB_USER=backend  # postgres username, django default db settings
+APP_DB_PASS=!qwerty1  # postgres password, django default db settings
 APP_DB_PORT=15432
 APP_BACKEND_NAME=backend
 APP_FRONTEND_NAME=frontend
@@ -22,7 +23,7 @@ print_db_usage () {
   echo "Your PostgreSQL database has been setup and can be accessed on your local machine on the forwarded port (default: $APP_DB_PORT)"
   echo "  Host: localhost"
   echo "  Port: $APP_DB_PORT"
-  echo "  Database: $APP_ROOT_NAME"
+  echo "  Database: $APP_NAME"
   echo "  Username: $APP_DB_USER"
   echo "  Password: $APP_DB_PASS"
   echo ""
@@ -33,13 +34,13 @@ print_db_usage () {
   echo "psql access to app database user via VM:"
   echo "  vagrant ssh"
   echo "  sudo su - postgres"
-  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost $APP_ROOT_NAME"
+  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost $APP_NAME"
   echo ""
   echo "Env variable for application development:"
-  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:$APP_DB_PORT/$APP_ROOT_NAME"
+  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:$APP_DB_PORT/$APP_NAME"
   echo ""
   echo "Local command to access the database via psql:"
-  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p $APP_DB_PORT $APP_ROOT_NAME"
+  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p $APP_DB_PORT $APP_NAME"
 }
 
 export DEBIAN_FRONTEND=noninteractive
@@ -73,6 +74,8 @@ apt-get -y upgrade
 echo "##### Backend #####"
 
 echo "Installing PostgreSQL..."
+locale-gen en_US.UTF-8
+dpkg-reconfigure locales
 apt-get -y install "postgresql-$PG_VERSION" "postgresql-contrib-$PG_VERSION"
 
 PG_CONF="/etc/postgresql/$PG_VERSION/main/postgresql.conf"
@@ -96,7 +99,7 @@ cat << EOF | su - postgres -c psql
 CREATE USER $APP_DB_USER WITH PASSWORD '$APP_DB_PASS';
 
 -- Create the database:
-CREATE DATABASE $APP_ROOT_NAME  WITH OWNER=$APP_DB_USER
+CREATE DATABASE $APP_NAME  WITH OWNER=$APP_DB_USER
                                 LC_COLLATE='en_US.utf8'
                                 LC_CTYPE='en_US.utf8'
                                 ENCODING='UTF8'
@@ -116,7 +119,7 @@ apt-get -y install python-setuptools
 easy_install -U pip
 
 echo "Installing required packages for python package 'psycopg2'..."
-apt-get -y install python-dev python3-dev libpq-dev
+apt-get -y install build-essential python-dev python3-dev libpq-dev libffi-dev libssl-dev
 
 echo "Installing virtualenvwrapper..."
 pip install virtualenvwrapper
@@ -125,13 +128,13 @@ echo "Setting up virtual environment..."
 echo "" >> ${USER_HOME}/.bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> ${USER_HOME}/.bashrc
 echo "cd $PROJECT_ROOT_DIR" >> ${USER_HOME}/.bashrc
-echo "workon $APP_ROOT_NAME" >> ${USER_HOME}/.bashrc
-echo "export DJANGO_SETTINGS_MODULE=$APP_ROOT_NAME.settings" >> ${USER_HOME}/.bashrc
+echo "workon $APP_NAME" >> ${USER_HOME}/.bashrc
+echo "export DJANGO_SETTINGS_MODULE=$APP_NAME.settings" >> ${USER_HOME}/.bashrc
 
 echo "Setting up django project requirements..."
 sudo su - vagrant /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh; \
+                                mkvirtualenv --python=`which python` $APP_NAME; \
                                 cd ${PROJECT_BACKEND_DIR}; \
-                                mkvirtualenv --python=`which python` $APP_ROOT_NAME; \
                                 pip install -r requirements/requirements-dev.txt; \
                                 python manage.py makemigrations; \
                                 python manage.py migrate; \
@@ -147,6 +150,8 @@ apt-get install -y build-essential
 echo "Installing Node modules..."
 sudo su - vagrant /bin/bash -c "cd ${PROJECT_FRONTEND_DIR}; \
                                 npm install;"
+
+apt-get -y autoremove
 
 # Tag the provision time:
 date > "$PROVISIONED_ON"

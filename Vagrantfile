@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-echo I am provisioning...
+echo "##### PROVISIONING #####"
 date > /etc/vagrant_provisioned_at
 SCRIPT
 

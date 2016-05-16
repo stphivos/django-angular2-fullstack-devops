@@ -52,3 +52,6 @@ class TrackedModel(BaseModel):
 
 class Profile(TrackedModel):
     user = models.OneToOneField(User)
+
+    def __unicode__(self):
+        return self.user.__unicode__()
