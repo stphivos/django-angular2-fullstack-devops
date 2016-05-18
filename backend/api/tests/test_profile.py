@@ -10,8 +10,8 @@ class UnitTestProfile(BaseUnitTestCase):
         model = self.prepare_model(Profile)
 
         values = {
-            'created': model.created,
-            'modified': model.modified,
+            'created': self.format_date(model.created),
+            'modified': self.format_date(model.modified),
             'user': model.user_id
         }
         fields = values.keys()
@@ -24,7 +24,7 @@ class UnitTestProfile(BaseUnitTestCase):
 
 
 class IntegrationTestProfile(BaseIntegrationTestCase):
-    base_endpoint = '/profiles/'
+    base_endpoint = '/api/profiles/'
 
     def test_profiles_endpoint_forbids_anonymous_users(self):
         response = self.pub_api().get(self.base_endpoint)

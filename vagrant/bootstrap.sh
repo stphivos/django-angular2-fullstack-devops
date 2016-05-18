@@ -5,7 +5,7 @@ APP_ROOT_NAME=fullstack  # vagrant sync dir, box hostname
 
 APP_DB_USER=backend  # postgres username, django default db settings
 APP_DB_PASS=!qwerty1  # postgres password, django default db settings
-APP_DB_PORT=15432
+APP_DB_HOST_PORT=15432
 APP_BACKEND_NAME=backend
 APP_FRONTEND_NAME=frontend
 
@@ -15,14 +15,16 @@ PROJECT_BACKEND_DIR=$PROJECT_ROOT_DIR/$APP_BACKEND_NAME
 PROJECT_FRONTEND_DIR=$PROJECT_ROOT_DIR/$APP_FRONTEND_NAME
 
 PG_VERSION=9.4
+PYTHON_VERSION=2.7.9
+NODE_VERSION=6
 
 ###########################################################
 # Changes below this line are probably not necessary
 ###########################################################
 print_db_usage () {
-  echo "Your PostgreSQL database has been setup and can be accessed on your local machine on the forwarded port (default: $APP_DB_PORT)"
+  echo "Your PostgreSQL database has been setup and can be accessed on your local machine on the forwarded port (default: $APP_DB_HOST_PORT)"
   echo "  Host: localhost"
-  echo "  Port: $APP_DB_PORT"
+  echo "  Port: $APP_DB_HOST_PORT"
   echo "  Database: $APP_NAME"
   echo "  Username: $APP_DB_USER"
   echo "  Password: $APP_DB_PASS"
@@ -37,10 +39,10 @@ print_db_usage () {
   echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost $APP_NAME"
   echo ""
   echo "Env variable for application development:"
-  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:$APP_DB_PORT/$APP_NAME"
+  echo "  DATABASE_URL=postgresql://$APP_DB_USER:$APP_DB_PASS@localhost:$APP_DB_HOST_PORT/$APP_NAME"
   echo ""
   echo "Local command to access the database via psql:"
-  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p $APP_DB_PORT $APP_NAME"
+  echo "  PGUSER=$APP_DB_USER PGPASSWORD=$APP_DB_PASS psql -h localhost -p $APP_DB_HOST_PORT $APP_NAME"
 }
 
 export DEBIAN_FRONTEND=noninteractive
@@ -58,20 +60,20 @@ fi
 PG_REPO_APT_SOURCE=/etc/apt/sources.list.d/pgdg.list
 if [ ! -f "$PG_REPO_APT_SOURCE" ]
 then
-  # Add PG apt repo:
+  echo "Add PG apt repo"
   echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > "$PG_REPO_APT_SOURCE"
 
-  # Add PGDG repo key:
+  echo "Add PGDG repo key"
   wget --quiet -O - https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
 fi
 
 echo "##### UPGRADE #####"
 
-# Update package list and upgrade all packages
+echo "Update package list and upgrade all packages"
 apt-get update
 apt-get -y upgrade
 
-# Make sure we get UTF-8
+echo "Set locale to UTF-8"
 locale-gen en_US.UTF-8
 update-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
@@ -84,16 +86,16 @@ PG_CONF="/etc/postgresql/$PG_VERSION/main/postgresql.conf"
 PG_HBA="/etc/postgresql/$PG_VERSION/main/pg_hba.conf"
 PG_DIR="/var/lib/postgresql/$PG_VERSION/main"
 
-# Edit postgresql.conf to change listen address to '*':
+echo "Edit postgresql.conf to change listen address to '*'"
 sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "$PG_CONF"
 
-# Append to pg_hba.conf to add password auth:
+echo "Append to pg_hba.conf to add password auth"
 echo "host    all             all             all                     md5" >> "$PG_HBA"
 
-# Explicitly set default client_encoding
+echo "Explicitly set default client_encoding to utf8"
 echo "client_encoding = utf8" >> "$PG_CONF"
 
-# Restart so that all new config is loaded:
+echo "Restart postgresql so that all new config is loaded":
 service postgresql restart
 
 cat << EOF | su - postgres -c psql
@@ -113,15 +115,21 @@ EOF
 
 print_db_usage
 
+echo "Installing packages..."
+apt-get install -y  build-essential python-dev python3-dev libpq-dev \
+                    gcc-multilib g++-multilib libffi-dev libffi6 libffi6-dbg python-crypto \
+                    python-mox3 python-pil python-ply libssl-dev zlib1g-dev libbz2-dev \
+                    libexpat1-dev libbluetooth-dev libgdbm-dev dpkg-dev quilt autotools-dev \
+                    libreadline-dev libtinfo-dev libncursesw5-dev tk-dev blt-dev \
+                    zlib1g-dev libbz2-dev libexpat1-dev libbluetooth-dev libsqlite3-dev \
+                    libgpm2 mime-support netbase net-tools bzip2
+
 echo "Installing Git..."
 apt-get -y install git
 
 echo "Installing python setuptools..."
 apt-get -y install python-setuptools
 easy_install -U pip
-
-echo "Installing required packages for python package 'psycopg2'..."
-apt-get -y install build-essential python-dev python3-dev libpq-dev libffi-dev libssl-dev
 
 echo "Installing virtualenvwrapper..."
 pip install virtualenvwrapper
@@ -133,25 +141,34 @@ echo "cd $PROJECT_ROOT_DIR" >> ${USER_HOME}/.bashrc
 echo "workon $APP_NAME" >> ${USER_HOME}/.bashrc
 echo "export DJANGO_SETTINGS_MODULE=$APP_NAME.settings" >> ${USER_HOME}/.bashrc
 
+echo "Downloading and compiling python..."
+wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+tar xfz Python-$PYTHON_VERSION.tgz
+cd Python-$PYTHON_VERSION/
+./configure --prefix /usr/local/lib/python$PYTHON_VERSION --enable-ipv6
+make
+make install
+
 echo "Setting up django project requirements..."
 sudo su - vagrant /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh; \
-                                mkvirtualenv --python=`which python` $APP_NAME; \
+                                mkvirtualenv --python=/usr/local/lib/python$PYTHON_VERSION/bin/python $APP_NAME; \
                                 cd ${PROJECT_BACKEND_DIR}; \
                                 pip install -r requirements/requirements-dev.txt; \
                                 python manage.py makemigrations; \
                                 python manage.py migrate; \
+                                tox -e py27; \
                                 deactivate;"
 
 echo "##### Frontend #####"
 
 echo "Installing Node.js..."
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | sudo -E bash -
 apt-get install -y nodejs
-apt-get install -y build-essential
 
 echo "Installing Node modules..."
 sudo su - vagrant /bin/bash -c "cd ${PROJECT_FRONTEND_DIR}; \
-                                npm install;"
+                                npm install; \
+                                npm test;"
 
 apt-get -y autoremove
 

@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'oauth2_provider',
     'rest_framework',
     'api',
 ]
@@ -130,6 +131,10 @@ STATICFILES_DIRS = [
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'MAX_LIMIT': 100,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 MOMMY_CUSTOM_FIELDS_GEN = {
