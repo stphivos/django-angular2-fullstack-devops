@@ -1,6 +1,7 @@
 {
   "variables": {
     "git_repo": "{{env `GIT_REPO`}}",
+    "git_branch": "{{env `GIT_BRANCH`}}",
     "server_root_path": "{{env `SERVER_ROOT_PATH`}}",
     "application_name": "{{env `APPLICATION_NAME`}}",
     "server_root_name": "{{env `SERVER_ROOT_NAME`}}",
@@ -30,7 +31,7 @@
         "mkdir -p {{user `server_root_path`}}",
         "cd {{user `server_root_path`}}",
         "ssh-keyscan github.com > /etc/ssh/ssh_known_hosts",
-        "git clone {{user `git_repo`}} {{user `application_name`}}"
+        "git clone -b {{user `git_branch`}} --single-branch {{user `git_repo`}} {{user `application_name`}}"
       ],
       "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
     },

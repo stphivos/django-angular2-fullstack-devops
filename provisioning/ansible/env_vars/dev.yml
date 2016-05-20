@@ -1,8 +1,8 @@
 ---
 
-# Git settings.
-setup_git_repo: yes
-git_branch: dev
+## Git settings.
+#setup_git_repo: yes
+#git_branch: dev
 
 
 # Database settings.
