@@ -16,7 +16,7 @@
       "source_ami": "ami-3de90552",
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
-      "ami_name": "packer-quick-start {{timestamp}}"
+      "ami_name": "{{user `application_name`}} {{timestamp}}"
     }
   ],
   "provisioners": [

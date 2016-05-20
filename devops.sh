@@ -14,7 +14,7 @@ export PROJECT_PATH=${VIRTUALENV_PATH}/${PROJECT_NAME}
 
 build() {
    cd provisioning/packer
-   packer build $env.json
+   packer build ${env}.json
 }
 
 # call arguments verbatim:
