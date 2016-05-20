@@ -1,0 +1,46 @@
+{
+  "variables": {
+    "git_repo": "{{env `GIT_REPO`}}",
+    "server_root_path": "{{env `SERVER_ROOT_PATH`}}",
+    "application_name": "{{env `APPLICATION_NAME`}}",
+    "server_root_name": "{{env `SERVER_ROOT_NAME`}}",
+    "project_name": "{{env `PROJECT_NAME`}}",
+    "virtualenv_path": "{{env `VIRTUALENV_PATH`}}",
+    "project_path": "{{env `PROJECT_PATH`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "eu-central-1",
+      "source_ami": "ami-3de90552",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-quick-start {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "setup.sh",
+      "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p {{user `server_root_path`}}",
+        "cd {{user `server_root_path`}}",
+        "ssh-keyscan github.com > /etc/ssh/ssh_known_hosts",
+        "git clone {{user `git_repo`}} {{user `application_name`}}"
+      ],
+      "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "../ansible/dev.yml",
+      "playbook_dir": "../ansible/",
+      "extra_arguments": [
+        "--extra-vars \"server_root_name={{user `server_root_name`}} application_name={{user `application_name`}} project_name={{user `project_name`}} virtualenv_path={{user `virtualenv_path`}} project_path={{user `project_path`}}\""
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+---
+
+# Application settings.
+application_log_dir: "{{ virtualenv_path }}/logs"
+application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
+requirements_file: "{{ project_path }}/requirements/requirements.txt"
+
+# Gunicorn settings
+gunicorn_user: "{{ application_name }}"
+gunicorn_group: "{{ server_root_name }}"
+
+# Nginx settings
+nginx_http_port: 80
+nginx_https_port: 443
+nginx_access_log_file: "{{ application_log_dir }}/nginx_access.log"
+nginx_error_log_file: "{{ application_log_dir }}/nginx_error.log"
+nginx_static_dir: "{{ virtualenv_path }}/static/"
+nginx_media_dir: "{{ virtualenv_path }}/media/"
+
+# Django Environment variables
+django_environment:
+  DJANGO_SETTINGS_MODULE: "{{ django_settings_file }}"
+  DJANGO_SECRET_KEY: "{{ django_secret_key }}"
+  MEDIA_ROOT: "{{ nginx_media_dir }}"
+  STATIC_ROOT: "{{ nginx_static_dir }}"
+  DATABASE_USER: "{{ db_user }}"
+  DATABASE_PASSWORD: "{{ db_password }}"
+  EMAIL_HOST: "{{ email_host|default(omit) }}"
+  EMAIL_HOST_USER: "{{ email_host_user|default(omit) }}"
+  EMAIL_HOST_PASSWORD: "{{ email_host_password|default(omit) }}"
+  BROKER_URL: "{{ broker_url|default(omit) }}"

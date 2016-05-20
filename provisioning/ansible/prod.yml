@@ -1,0 +1,9 @@
+---
+
+- include: webservers.yml
+  vars:
+    env: prod
+
+- include: dbservers.yml
+  vars:
+    env: prod
