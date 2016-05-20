@@ -6,6 +6,6 @@ from .base import *
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'backend',
+        'NAME': 'db.sqlite3',
     }
 }
