@@ -1,9 +1,0 @@
----
-
-- include: webservers.yml
-  vars:
-    env: dev
-
-#- include: dbservers.yml
-#  vars:
-#    env: dev

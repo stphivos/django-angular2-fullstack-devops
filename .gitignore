@@ -2,4 +2,6 @@
 .idea/
 .vagrant/
 *.log
+*.tfstate*
+*.retry
 frontend-bak/

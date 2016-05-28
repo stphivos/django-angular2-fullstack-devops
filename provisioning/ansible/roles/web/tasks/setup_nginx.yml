@@ -7,7 +7,7 @@
 #- name: Copy the SSL certificate to the remote server
 #  copy: content="{{ ssl_crt }}" dest={{ ssl_dest_dir }}/{{ application_name }}.crt
 #  notify: restart nginx
-#
+
 #- name: Copy the SSL private key to the remote server
 #  copy: content="{{ ssl_key }}" dest={{ ssl_dest_dir }}/{{ application_name }}.key
 #  notify: restart nginx

@@ -1,14 +1,11 @@
 ---
 
-- name: Provision a {{ application_name }} web server in {{ env }}
-  #hosts: webservers
-  hosts: all
+- name: Provision {{ application_name }} web server in {{ env }}
+  hosts: web
   become: yes
   become_method: sudo
   become_user: root
   remote_user: root
-  vars:
-    - update_apt_cache: yes
   vars_files:
     - env_vars/base.yml
     - env_vars/{{ env }}.yml

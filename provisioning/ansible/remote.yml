@@ -2,8 +2,8 @@
 
 - include: webservers.yml
   vars:
-    env: prod
+    update_apt_cache: yes
 
 - include: dbservers.yml
   vars:
-    env: prod
+    update_apt_cache: yes
