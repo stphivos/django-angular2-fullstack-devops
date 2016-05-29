@@ -26,6 +26,11 @@ setup() {
 }
 
 build() {
+    if [ "$#" -ne 2 ]
+    then
+      echo "'build' command requires 'env' and 'inventory' arguments."
+      exit 1
+    fi
     cd provisioning/packer
     packer build pack.json
     cd ../../

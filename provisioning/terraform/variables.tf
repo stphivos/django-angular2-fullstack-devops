@@ -42,7 +42,7 @@ variable "aws_region" {
 variable "aws_amis" {
   description = "Amazon Machine Image (AMI) ids produced by packer"
   default = {
-    eu-central-1 = "ami-b5bf50da"
+    eu-central-1 = "ami-883ed1e7"
     # TODO: Get ami from environment variables
   }
 }
