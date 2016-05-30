@@ -8,7 +8,7 @@ export INVENTORY_LIMIT=${inventory}
 
 export REGION=eu-central-1
 export INSTANCE_TYPE=t2.micro
-export SOURCE_AMI=ami-3de90552
+export SOURCE_AMI=ami-9cee02f3
 export SSH_USERNAME=ubuntu
 
 export GIT_REPO=git@github.com:stphivos/django-angular2-fullstack-compact.git
@@ -31,18 +31,21 @@ build() {
       echo "'build' command requires 'env' and 'inventory' arguments."
       exit 1
     fi
+    vars=$(pwd)"/provisioning/terraform/terraform.tfvars"
     cd provisioning/packer
-    packer build pack.json
+
+    echo "Packer building..."
+    packer build pack.json | \
+    tee /dev/tty | \
+    grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
+    perl -ne '@parts = split /[:,\s]+/, $_; print "aws_amis." . $parts[0] ." = \"" . $parts[1] . "\"\n"' > ${vars}
     cd ../../
+    deploy
 }
 
 deploy() {
+    echo "Terraform applying..."
     cd provisioning/terraform
-    # args = -var 'app_name=value' \
-    #   'public_key_path=value' \
-    #   'key_name=value' \
-    #   'key=value'
-    # terraform plan
     terraform apply
     cd ../../
 }
