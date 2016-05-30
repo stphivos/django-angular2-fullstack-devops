@@ -43,6 +43,5 @@ variable "aws_amis" {
   description = "Amazon Machine Image (AMI) ids produced by packer"
   default = {
     eu-central-1 = "<terraform.tfvars>"
-    # TODO: Get ami from environment variables
   }
 }
