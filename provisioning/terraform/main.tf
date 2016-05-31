@@ -104,7 +104,31 @@ resource "aws_elb" "web" {
     lb_port = 80
     lb_protocol = "http"
   }
+}
 
+// TODO: Point frontend route53 record to S3
+//resource "aws_route53_record" "frontend" {
+//  zone_id = "${var.aws_zone_id}"
+//  name = "example.com"
+//  type = "A"
+//
+//  alias {
+//    name = "${aws_elb.web.dns_name}"
+//    zone_id = "${aws_elb.web.zone_id}"
+//    evaluate_target_health = true
+//  }
+//}
+
+resource "aws_route53_record" "backend" {
+  zone_id = "${var.aws_zone_id}"
+  name = "${lookup(var.aws_env_domains, "${var.app_env}_backend")}"
+  type = "A"
+
+  alias {
+    name = "${aws_elb.web.dns_name}"
+    zone_id = "${aws_elb.web.zone_id}"
+    evaluate_target_health = true
+  }
 }
 
 resource "aws_key_pair" "auth" {

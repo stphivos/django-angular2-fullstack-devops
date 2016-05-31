@@ -3,6 +3,11 @@ variable "app_name" {
   default = "fullstack"
 }
 
+variable "app_env" {
+  description = "Name of the app environment to provision"
+  default = "dev"
+}
+
 variable "key_name" {
   description = "Name of EC2 keypair to login to the instance"
   default = "fullstack"
@@ -44,4 +49,20 @@ variable "aws_amis" {
   default = {
     eu-central-1 = "<terraform.tfvars>"
   }
+}
+
+variable "aws_env_domains" {
+  description = "Domains for all environments"
+  default = {
+    prod_frontend = "www"
+    prod_bakcend = "api"
+    dev_frontend = "dev"
+    dev_backend = "dev.api"
+  }
+}
+
+variable "aws_zone_id" {
+  description = "Route53 Hosted Zone resource id."
+  default = "Z3BXIXH96UUDRV"
+  # TODO: Get zone id from environment variables
 }
