@@ -56,5 +56,5 @@
 - name: Ensure user does not have unnecessary privileges
   become_user: postgres
   postgresql_user: name={{ db_user }}
-                   role_attr_flags=NOSUPERUSER,NOCREATEDB
+                   role_attr_flags=NOSUPERUSER,CREATEDB
                    state=present

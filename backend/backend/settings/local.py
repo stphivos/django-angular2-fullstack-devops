@@ -7,7 +7,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'fullstack',
-        'USER': 'fullstack',
+        'USER': 'vagrant',
         'PASSWORD': '!qwerty1',
         'HOST': '10.10.10.10',
         'PORT': '',  # Empty string for default (5432)

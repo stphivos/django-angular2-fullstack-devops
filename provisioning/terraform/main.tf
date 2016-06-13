@@ -144,7 +144,6 @@ resource "aws_instance" "web" {
     user = "${var.user}"
     private_key = "${file(var.private_key_path)}"
     agent = false
-    # The connection will use the local SSH agent for authentication.
   }
 
   instance_type = "${var.instance_type}"

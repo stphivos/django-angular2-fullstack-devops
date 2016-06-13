@@ -6,7 +6,6 @@ application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 requirements_file: "{{ project_path }}/requirements/requirements.txt"
 
 # Gunicorn settings
-gunicorn_user: "{{ application_name }}"
 gunicorn_group: "{{ server_root_name }}"
 
 # Nginx settings

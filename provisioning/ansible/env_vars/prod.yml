@@ -14,6 +14,7 @@ postgresql_version: 9.5
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1
 gunicorn_num_workers: 3
+gunicorn_user: "{{ application_name }}"
 
 # Setting this to 1 will restart the Gunicorn process each time
 # you make a request, basically reloading the code. Very handy
