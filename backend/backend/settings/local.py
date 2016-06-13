@@ -6,7 +6,7 @@ from .base import *
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'fullstack',
+        'NAME': 'backend',
         'USER': 'vagrant',
         'PASSWORD': '!qwerty1',
         'HOST': '10.10.10.10',

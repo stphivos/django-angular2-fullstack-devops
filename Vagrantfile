@@ -18,7 +18,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 8000, host: 18000
   config.vm.network "forwarded_port", guest: 5432, host: 15432
 
-  config.vm.synced_folder ".", "/home/vagrant/fullstack"
+  #config.vm.synced_folder ".", "/home/vagrant/fullstack"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
