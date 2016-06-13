@@ -6,8 +6,8 @@
 
 
 # Database settings.
-db_user: "{{ project_name }}"
-db_name: "{{ project_name }}"
+db_user: "{{ application_name }}"
+db_name: "{{ application_name }}"
 db_password: "!qwerty1"
 postgresql_version: 9.5
 

@@ -8,8 +8,8 @@
 # Database settings.
 db_user: "{{ application_name }}"
 db_name: "{{ application_name }}"
-db_password: password  # TODO: Change production db_password
-
+db_password: "!qwerty1"  # TODO: Change production db_password
+postgresql_version: 9.5
 
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1

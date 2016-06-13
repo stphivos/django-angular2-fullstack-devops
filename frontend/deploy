@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 bucket=$1
 fast=$2
 create=$3

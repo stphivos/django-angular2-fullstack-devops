@@ -18,8 +18,8 @@ export SERVER_ROOT_NAME=webapps
 export APPLICATION_NAME=fullstack
 export PROJECT_NAME=backend
 export SERVER_ROOT_PATH=/${SERVER_ROOT_NAME}
-export VIRTUALENV_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}
-export PROJECT_PATH=${VIRTUALENV_PATH}/${PROJECT_NAME}
+export VIRTUALENV_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}/virtualenv
+export PROJECT_PATH=${VIRTUALENV_PATH}/../${PROJECT_NAME}
 
 setup() {
     vagrant halt && vagrant destroy -f && vagrant up
@@ -40,7 +40,6 @@ build() {
     grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
     perl -ne '@parts = split /[:,\s]+/, $_; print "aws_amis." . $parts[0] ." = \"" . $parts[1] . "\"\n"' > ${vars}
     cd ../../
-    deploy
 }
 
 deploy() {

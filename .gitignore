@@ -3,5 +3,6 @@
 .vagrant/
 *.log
 *.tfstate*
+*.tfvars*
 *.retry
 frontend-bak/
