@@ -1,20 +1,15 @@
 ---
 
-## Git settings.
-#setup_git_repo: yes
-#git_branch: master
+# Project settings.
+env_user: vagrant
 
 
 # Database settings.
-db_user: "vagrant"
-db_name: "{{ project_name }}"
 db_password: "!qwerty1"
-postgresql_version: 9.5
 
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1
 gunicorn_num_workers: 3
-gunicorn_user: "vagrant"
 
 # Setting this to 1 will restart the Gunicorn process each time
 # you make a request, basically reloading the code. Very handy

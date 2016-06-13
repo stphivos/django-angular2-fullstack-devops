@@ -2,7 +2,7 @@
 
 server_root_dir: "/{{ server_root_name }}"
 
-celery_user: "{{ application_name }}"
+celery_user: "{{ env_user }}"
 celery_group: "{{ server_root_name }}"
 
 celery_application_name: celery

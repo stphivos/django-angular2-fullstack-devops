@@ -5,6 +5,7 @@ application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 
 # Gunicorn settings
+gunicorn_user: "{{ env_user }}"
 gunicorn_group: "{{ server_root_name }}"
 
 # Nginx settings
