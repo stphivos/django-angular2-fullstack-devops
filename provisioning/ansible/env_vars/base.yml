@@ -1,9 +1,4 @@
 ---
 
-#git_repo: git@github.com:stphivos/django-angular2-fullstack-compact.git
-
-#server_root_name: "{{ lookup('env','SERVER_ROOT_NAME') }}"
-#application_name: "{{ lookup('env','APPLICATION_NAME') }}"
-#project_name: "{{ lookup('env','PROJECT_NAME') }}"
-#virtualenv_path: "{{ lookup('env','VIRTUALENV_PATH') }}"
-#project_path: "{{ lookup('env','PROJECT_PATH') }}"
+# Database settings.
+db_user: "{{ env_user }}"

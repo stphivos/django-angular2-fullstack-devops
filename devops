@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh -e
 
 env=$2
 inventory=$3
@@ -18,8 +18,9 @@ export SERVER_ROOT_NAME=webapps
 export APPLICATION_NAME=fullstack
 export PROJECT_NAME=backend
 export SERVER_ROOT_PATH=/${SERVER_ROOT_NAME}
-export VIRTUALENV_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}/virtualenv
-export PROJECT_PATH=${VIRTUALENV_PATH}/../${PROJECT_NAME}
+export APPLICATION_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}
+export VIRTUALENV_PATH=${APPLICATION_PATH}/virtualenv
+export PROJECT_PATH=${APPLICATION_PATH}/${PROJECT_NAME}
 
 setup() {
     vagrant halt && vagrant destroy -f && vagrant up
