@@ -1,11 +1,13 @@
 #!/bin/sh -e
 
+HOME=$(pwd)
+
 echo "Setup bashrc"
 printf "\n# ${APPLICATION_NAME}
 source ${VIRTUALENV_PATH}/bin/activate
 source ${VIRTUALENV_PATH}/bin/postactivate
-cd ${APPLICATION_PATH}
-" >> $(pwd)/.bashrc
+cd ${HOME}/${APPLICATION_NAME}
+" >> ${HOME}/.bashrc
 
 echo "Clone git repo"
 mkdir -p ${SERVER_ROOT_PATH}

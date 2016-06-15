@@ -1,1 +1,1 @@
-aws_amis.eu-central-1 = "ami-8de70ee2"
+aws_amis.eu-central-1 = "ami-15df367a"

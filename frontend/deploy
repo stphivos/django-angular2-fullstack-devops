@@ -1,21 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/sh -e
 
 bucket=$1
 fast=$2
 create=$3
 region=eu-central-1
 
-if [[ -n "$fast" ]]; then
+if [[ -n "${fast}" ]]; then
     echo "Skipping build app..."
 else
     gulp build.prod --color
 fi
 
-if ! [[ -n "$create" ]]; then
+if ! [[ -n "${create}" ]]; then
     echo "Skipping create bucket..."
 else
 
-aws s3api create-bucket --bucket $bucket --region $region --create-bucket-configuration LocationConstraint=$region
+aws s3api create-bucket --bucket ${bucket} --region ${region} --create-bucket-configuration LocationConstraint=${region}
 
 cat > /tmp/policy <<EOF
 {
@@ -25,16 +25,16 @@ cat > /tmp/policy <<EOF
     "Effect":"Allow",
     "Principal": "*",
     "Action":["s3:GetObject"],
-    "Resource":["arn:aws:s3:::$bucket/*"]
+    "Resource":["arn:aws:s3:::${bucket}/*"]
   }]
 }
 EOF
 
 policy=$(cat /tmp/policy)
-aws s3api put-bucket-policy --bucket $bucket --policy "$policy"
-aws s3 website s3://$bucket/ --index-document index.html
+aws s3api put-bucket-policy --bucket ${bucket} --policy "$policy"
+aws s3 website s3://${bucket}/ --index-document index.html
 
 fi
 
-aws s3 cp dist/prod/ s3://$bucket --recursive
-open "http://$bucket.s3-website.$region.amazonaws.com"
+aws s3 cp dist/prod/ s3://${bucket} --recursive
+open "http://${bucket}.s3-website.${region}.amazonaws.com"

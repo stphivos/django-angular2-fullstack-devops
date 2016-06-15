@@ -24,7 +24,7 @@ class UnitTestProfile(BaseUnitTestCase):
 
 
 class IntegrationTestProfile(BaseIntegrationTestCase):
-    base_endpoint = '/api/profiles/'
+    base_endpoint = '/profiles/'
 
     def test_profiles_endpoint_forbids_anonymous_users(self):
         response = self.pub_api().get(self.base_endpoint)
