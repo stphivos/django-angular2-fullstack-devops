@@ -2,7 +2,7 @@
 .idea/
 .vagrant/
 *.log
-*.tfstate*
-*.tfvars*
+terraform.tfstate*
+terraform.tfvars
 *.retry
 frontend-bak/

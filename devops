@@ -1,11 +1,6 @@
 #!/bin/sh -e
 
-env=$2
-inventory=$3
-
-export ENVIRONMENT=${env}
-export INVENTORY_LIMIT=${inventory}
-
+export ENVIRONMENTS=dev,prod
 export REGION=eu-central-1
 export INSTANCE_TYPE=t2.micro
 export SOURCE_AMI=ami-9cee02f3
@@ -26,16 +21,23 @@ setup() {
     vagrant halt && vagrant destroy -f && vagrant up
 }
 
-build() {
-    if [ "$#" -ne 2 ]
-    then
-      echo "'build' command requires 'env' and 'inventory' arguments."
-      exit 1
-    fi
+build_frontend() {
+    echo "Building $1 frontend..."
+
+    cd frontend
+    gulp build.$1 --color
+    cd ../
+}
+
+build_backend() {
+    echo "Building $1 backend $2..."
+
+    export ENVIRONMENT=${1}
+    export INVENTORY_LIMIT=${2}
+
     vars=$(pwd)"/provisioning/terraform/terraform.tfvars"
     cd provisioning/packer
 
-    echo "Packer building..."
     packer build pack.json | \
     tee /dev/tty | \
     grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
@@ -43,11 +45,108 @@ build() {
     cd ../../
 }
 
-deploy() {
-    echo "Terraform applying..."
+build() {
+    env=$1
+    project=$2
+    inventory=$3
+
+    if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
+        echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
+        return 1;
+    fi
+
+    case "$project" in
+    frontend)
+        build_frontend ${env}
+        ;;
+    backend)
+        if [ -z ${inventory} ]; then
+            build_backend ${env} web
+            build_backend ${env} db
+        else
+            build_backend ${env} ${inventory}
+        fi
+        ;;
+    *) echo
+        build_frontend ${env}
+        build_backend ${env} web
+        build_backend ${env} db
+       ;;
+    esac
+}
+
+deploy_frontend() {
+    echo "Deploying $1 frontend..."
+
+    ENVIRONMENT=${1}
+    bucket=${APPLICATION_NAME}.${ENVIRONMENT}
+
+    if [ $(aws s3api list-buckets | grep -o \"${bucket}\") ]; then
+        echo "Create bucket ${bucket} skipped."
+    else
+        aws s3api create-bucket --bucket ${bucket} --region ${REGION} --create-bucket-configuration LocationConstraint=${REGION}
+
+        cat > /tmp/policy <<EOF
+{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Sid":"PublicReadGetObject",
+    "Effect":"Allow",
+    "Principal": "*",
+    "Action":["s3:GetObject"],
+    "Resource":["arn:aws:s3:::${bucket}/*"]
+  }]
+}
+EOF
+
+    policy=$(cat /tmp/policy)
+    aws s3api put-bucket-policy --bucket ${bucket} --policy "$policy"
+    aws s3 website s3://${bucket}/ --index-document index.html
+    fi
+
+    aws s3 cp frontend/dist/${ENVIRONMENT}/ s3://${bucket} --recursive
+    open "http://${bucket}.s3-website.${REGION}.amazonaws.com"
+}
+
+deploy_backend() {
+    echo "Deploying $1 backend $2..."
+
+    export ENVIRONMENT=${1}
+    export INVENTORY_LIMIT=${2}
+
     cd provisioning/terraform
     terraform apply
     cd ../../
+}
+
+deploy() {
+    env=$1
+    project=$2
+    inventory=$3
+
+    if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
+        echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
+        return 1;
+    fi
+
+    case "$project" in
+    frontend)
+        deploy_frontend ${env}
+        ;;
+    backend)
+        if [ -z ${inventory} ]; then
+            deploy_backend ${env} web
+            deploy_backend ${env} db
+        else
+            deploy_backend ${env} ${inventory}
+        fi
+        ;;
+    *) echo
+        deploy_frontend ${env}
+        deploy_backend ${env} web
+        deploy_backend ${env} db
+       ;;
+    esac
 }
 
 # call arguments verbatim:
