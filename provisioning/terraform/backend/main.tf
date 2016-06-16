@@ -52,8 +52,7 @@ resource "aws_security_group" "elb" {
   }
 }
 
-# Our default security group to access
-# the instances over SSH and HTTP
+# Our default security group to access the instances over SSH and HTTP
 resource "aws_security_group" "default" {
   name = "${var.app_name}_sg_default"
   description = "Used in the terraform"
@@ -87,7 +86,6 @@ resource "aws_security_group" "default" {
   }
 }
 
-
 resource "aws_elb" "web" {
   name = "${var.app_name}-elb-web"
 
@@ -106,22 +104,9 @@ resource "aws_elb" "web" {
   }
 }
 
-// TODO: Point frontend route53 record to S3
-//resource "aws_route53_record" "frontend" {
-//  zone_id = "${var.aws_zone_id}"
-//  name = "example.com"
-//  type = "A"
-//
-//  alias {
-//    name = "${aws_elb.web.dns_name}"
-//    zone_id = "${aws_elb.web.zone_id}"
-//    evaluate_target_health = true
-//  }
-//}
-
 resource "aws_route53_record" "backend" {
   zone_id = "${var.aws_zone_id}"
-  name = "${lookup(var.aws_env_domains, "${var.app_env}_backend")}"
+  name = "${lookup(var.aws_env_domains, var.app_env)}"
   type = "A"
 
   alias {

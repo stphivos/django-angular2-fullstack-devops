@@ -1,6 +1,7 @@
 variable "app_name" {
   description = "Name of the app to provision"
   default = "fullstack"
+  # TODO: Get app_name from environment variables
 }
 
 variable "app_env" {
@@ -54,10 +55,8 @@ variable "aws_amis" {
 variable "aws_env_domains" {
   description = "Domains for all environments"
   default = {
-    prod_frontend = "www"
-    prod_bakcend = "api"
-    dev_frontend = "dev"
-    dev_backend = "dev.api"
+    prod = "api"
+    dev = "dev.api"
   }
 }
 

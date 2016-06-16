@@ -3,6 +3,6 @@
 .vagrant/
 *.log
 terraform.tfstate*
-terraform.tfvars
+*.tfvars
 *.retry
 frontend-bak/

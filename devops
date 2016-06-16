@@ -4,6 +4,7 @@ export ENVIRONMENTS=dev,prod
 export REGION=eu-central-1
 export INSTANCE_TYPE=t2.micro
 export SOURCE_AMI=ami-9cee02f3
+export ROOT_DOMAIN=pstylianides.com
 export SSH_USERNAME=ubuntu
 
 export GIT_REPO=git@github.com:stphivos/django-angular2-fullstack-compact.git
@@ -35,7 +36,7 @@ build_backend() {
     export ENVIRONMENT=${1}
     export INVENTORY_LIMIT=${2}
 
-    vars=$(pwd)"/provisioning/terraform/terraform.tfvars"
+    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}.${INVENTORY_LIMIT}.tfvars"
     cd provisioning/packer
 
     packer build pack.json | \
@@ -78,8 +79,8 @@ build() {
 deploy_frontend() {
     echo "Deploying $1 frontend..."
 
-    ENVIRONMENT=${1}
-    bucket=${APPLICATION_NAME}.${ENVIRONMENT}
+    export ENVIRONMENT=${1}
+    bucket=${ENVIRONMENT}.${ROOT_DOMAIN}
 
     if [ $(aws s3api list-buckets | grep -o \"${bucket}\") ]; then
         echo "Create bucket ${bucket} skipped."
@@ -105,7 +106,10 @@ EOF
     fi
 
     aws s3 cp frontend/dist/${ENVIRONMENT}/ s3://${bucket} --recursive
-    open "http://${bucket}.s3-website.${REGION}.amazonaws.com"
+
+    cd provisioning/terraform/frontend
+    terraform apply
+    cd ../../
 }
 
 deploy_backend() {
@@ -114,9 +118,12 @@ deploy_backend() {
     export ENVIRONMENT=${1}
     export INVENTORY_LIMIT=${2}
 
-    cd provisioning/terraform
-    terraform apply
+    cd provisioning/terraform/backend
+    terraform apply -var-file="${ENVIRONMENT}.${INVENTORY_LIMIT}.tfvars"
     cd ../../
+
+    # See terraform examples for aws rds configuration:
+    # https://github.com/hashicorp/terraform/tree/master/examples/aws-rds
 }
 
 deploy() {
