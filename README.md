@@ -1,5 +1,5 @@
 # django-angular2-fullstack-compact
-All-in-one fill-in-the-blanks django/angular2 environment seed
+All-in-one django/angular2 environment seed
 
 ## Features
 * Vagrant provisioning
