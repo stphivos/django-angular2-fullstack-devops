@@ -1,4 +1,5 @@
 ---
 
 # Database settings.
-db_user: "{{ env_user }}"
+db_name: "{{ application_name }}"
+db_user: "{{ application_name }}"

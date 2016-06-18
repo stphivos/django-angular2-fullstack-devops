@@ -63,7 +63,7 @@
       "inventory_file": "../ansible/inventories/{{user `environment`}}",
       "extra_arguments": [
         "--limit \"{{user `inventory_limit`}}\"",
-        "--extra-vars \"env={{user `environment`}} server_root_name={{user `server_root_name`}} application_name={{user `application_name`}} project_name={{user `project_name`}} virtualenv_path={{user `virtualenv_path`}} project_path={{user `project_path`}}\""
+        "--extra-vars \"env={{user `environment`}} server_root_name={{user `server_root_name`}} application_name={{user `application_name`}} project_name={{user `project_name`}} db_host={{user `db_host`}} virtualenv_path={{user `virtualenv_path`}} project_path={{user `project_path`}}\""
       ]
     }
   ]

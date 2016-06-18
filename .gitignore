@@ -2,7 +2,6 @@
 .idea/
 .vagrant/
 *.log
-terraform.tfstate*
-*.tfvars
+*.backup
 *.retry
 frontend-bak/

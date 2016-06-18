@@ -31,15 +31,16 @@ build_frontend() {
 }
 
 build_backend() {
-    echo "Building $1 backend $2..."
+    echo "Building $1 backend..."
 
     export ENVIRONMENT=${1}
-    export INVENTORY_LIMIT=${2}
+    export INVENTORY_LIMIT=web
 
-    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}.${INVENTORY_LIMIT}.tfvars"
+    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}.packer.tfvars"
     cd provisioning/packer
 
-    packer build pack.json | \
+    # TODO: Check rds vars json file exists
+    packer build -var-file="${ENVIRONMENT}.rds.json" pack.json | \
     tee /dev/tty | \
     grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
     perl -ne '@parts = split /[:,\s]+/, $_; print "aws_amis." . $parts[0] ." = \"" . $parts[1] . "\"\n"' > ${vars}
@@ -49,7 +50,6 @@ build_backend() {
 build() {
     env=$1
     project=$2
-    inventory=$3
 
     if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
         echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
@@ -61,17 +61,11 @@ build() {
         build_frontend ${env}
         ;;
     backend)
-        if [ -z ${inventory} ]; then
-            build_backend ${env} web
-            build_backend ${env} db
-        else
-            build_backend ${env} ${inventory}
-        fi
+        build_backend ${env}
         ;;
     *) echo
         build_frontend ${env}
-        build_backend ${env} web
-        build_backend ${env} db
+        build_backend ${env}
        ;;
     esac
 }
@@ -113,23 +107,34 @@ EOF
 }
 
 deploy_backend() {
-    echo "Deploying $1 backend $2..."
+    echo "Deploying $1 backend..."
 
     export ENVIRONMENT=${1}
-    export INVENTORY_LIMIT=${2}
+    export INVENTORY_LIMIT=web
 
     cd provisioning/terraform/backend
-    terraform apply -var-file="${ENVIRONMENT}.${INVENTORY_LIMIT}.tfvars"
+    terraform apply -var-file="${ENVIRONMENT}.packer.tfvars"
     cd ../../
+}
 
-    # See terraform examples for aws rds configuration:
-    # https://github.com/hashicorp/terraform/tree/master/examples/aws-rds
+deploy_rds() {
+    echo "Deploying $1 rds..."
+
+    export ENVIRONMENT=${1}
+
+    vars=$(pwd)"/provisioning/packer/${ENVIRONMENT}.rds.json"
+    cd provisioning/terraform/rds
+
+    terraform apply | \
+        tee /dev/tty | \
+        grep -E -o "db_instance_address = .+$" | \
+        perl -ne '@parts = split /[=,\s]+/, $_; print "{\"db_host\"" .": \"" . $parts[1] . "\"}\n"' > ${vars}
+    cd ../../
 }
 
 deploy() {
     env=$1
     project=$2
-    inventory=$3
 
     if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
         echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
@@ -141,17 +146,15 @@ deploy() {
         deploy_frontend ${env}
         ;;
     backend)
-        if [ -z ${inventory} ]; then
-            deploy_backend ${env} web
-            deploy_backend ${env} db
-        else
-            deploy_backend ${env} ${inventory}
-        fi
+        deploy_backend ${env}
+        ;;
+    rds)
+        deploy_rds ${env}
         ;;
     *) echo
+        deploy_rds ${env}
+        deploy_backend ${env}
         deploy_frontend ${env}
-        deploy_backend ${env} web
-        deploy_backend ${env} db
        ;;
     esac
 }
