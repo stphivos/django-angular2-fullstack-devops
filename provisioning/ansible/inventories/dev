@@ -1,5 +1,2 @@
 [web]
-webserver.dev
-
-[db]
-dbserver.dev
+dev.api.pstylianides.com

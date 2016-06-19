@@ -7,6 +7,7 @@ variable "app_name" {
 variable "app_env" {
   description = "Name of the app environment to provision"
   default = "dev"
+  # TODO: Get app_env from environment variables
 }
 
 variable "aws_region" {

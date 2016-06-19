@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_vpc" "default" {
   cidr_block = "10.0.0.0/16"
-  # TODO: Remove the following after setup
+  # TODO: Remove the following after setup to prevent internet access to db instances
   enable_dns_hostnames = true
 }
 
@@ -35,7 +35,7 @@ resource "aws_subnet" "subnet_2" {
 }
 
 resource "aws_db_subnet_group" "default" {
-  name = "main_subnet_group"
+  name = "${var.app_name}_${var.app_env}_subnet_group"
   description = "Our main group of subnets"
   subnet_ids = [
     "${aws_subnet.subnet_1.id}",
@@ -76,19 +76,17 @@ resource "aws_security_group" "default" {
 }
 
 resource "aws_db_instance" "default" {
-  depends_on = [
-    "aws_security_group.default"]
-  identifier = "${var.identifier}"
+  identifier = "${var.identifier}-${var.app_env}"
   allocated_storage = "${var.storage}"
   engine = "${var.engine}"
   engine_version = "${lookup(var.engine_version, var.engine)}"
   instance_class = "${var.instance_class}"
-  name = "${var.db_name}_${var.app_env}"
+  name = "${var.db_name}"
   username = "${var.username}"
   password = "${var.password}"
   vpc_security_group_ids = [
     "${aws_security_group.default.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.default.id}"
-  # TODO: Remove the following after setup
+  # TODO: Remove the following after setup to prevent internet access to db instances
   publicly_accessible = true
 }

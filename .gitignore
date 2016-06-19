@@ -4,4 +4,5 @@
 *.log
 *.backup
 *.retry
+*.terraform
 frontend-bak/

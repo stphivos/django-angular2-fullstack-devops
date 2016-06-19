@@ -41,7 +41,7 @@ flower_admin_password: password  # TODO: Change production flower_admin_password
 
 
 # Application settings.
-django_settings_file: "{{ application_name }}.settings.development"
+django_settings_file: "{{ project_name }}.settings.prod"
 django_secret_key: "y_w+5ku5d^i^h_l0%0%#8d#9^&-7$ea+ld@kcm77+ouf=j8#*4"  # TODO: Change production django_secret_key
 django_requirements_file: "{{ project_path }}/requirements/requirements.txt"
 

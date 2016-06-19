@@ -36,7 +36,7 @@ build_backend() {
     export ENVIRONMENT=${1}
     export INVENTORY_LIMIT=web
 
-    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}.packer.tfvars"
+    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}/packer.tfvars"
     cd provisioning/packer
 
     # TODO: Check rds vars json file exists
@@ -73,8 +73,11 @@ build() {
 deploy_frontend() {
     echo "Deploying $1 frontend..."
 
-    export ENVIRONMENT=${1}
-    bucket=${ENVIRONMENT}.${ROOT_DOMAIN}
+    export TF_VAR_app_env=${1}
+
+    env=${TF_VAR_app_env}
+    if [ ${env} == "prod" ]; then env=www; fi  # Use www sub-domain instead of env for production
+    bucket=${env}.${ROOT_DOMAIN}
 
     if [ $(aws s3api list-buckets | grep -o \"${bucket}\") ]; then
         echo "Create bucket ${bucket} skipped."
@@ -99,7 +102,8 @@ EOF
     aws s3 website s3://${bucket}/ --index-document index.html
     fi
 
-    aws s3 cp frontend/dist/${ENVIRONMENT}/ s3://${bucket} --recursive
+    # TODO: Frontend dev env responds with 404 for js files
+    aws s3 cp frontend/dist/${TF_VAR_app_env}/ s3://${bucket} --recursive
 
     cd provisioning/terraform/frontend
     terraform apply
@@ -109,22 +113,26 @@ EOF
 deploy_backend() {
     echo "Deploying $1 backend..."
 
-    export ENVIRONMENT=${1}
-    export INVENTORY_LIMIT=web
+    export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
 
-    cd provisioning/terraform/backend
-    terraform apply -var-file="${ENVIRONMENT}.packer.tfvars"
+    cd provisioning/terraform/backend/${TF_VAR_app_env}
+    # TODO: Check packer tfvars file exists
+    terraform apply -var-file="packer.tfvars"
     cd ../../
 }
 
 deploy_rds() {
     echo "Deploying $1 rds..."
 
-    export ENVIRONMENT=${1}
+    export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    vars=$(pwd)"/provisioning/packer/${TF_VAR_app_env}.rds.json"
 
-    vars=$(pwd)"/provisioning/packer/${ENVIRONMENT}.rds.json"
-    cd provisioning/terraform/rds
-
+    cd provisioning/terraform/rds/${TF_VAR_app_env}
+    terraform get
     terraform apply | \
         tee /dev/tty | \
         grep -E -o "db_instance_address = .+$" | \

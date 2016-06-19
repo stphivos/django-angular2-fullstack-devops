@@ -1,7 +1,6 @@
 variable "app_name" {
   description = "Name of the app to provision"
   default = "fullstack"
-  # TODO: Get app_name from environment variables
 }
 
 variable "app_env" {
@@ -42,7 +41,6 @@ variable "instance_type" {
 variable "aws_region" {
   description = "AWS region to launch servers."
   default = "eu-central-1"
-  # TODO: Get region from environment variables
 }
 
 variable "aws_amis" {
