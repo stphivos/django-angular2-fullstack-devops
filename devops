@@ -1,7 +1,8 @@
 #!/bin/sh -e
 
+### Project variables ###
+
 # General
-export ENVIRONMENTS=core,dev,prod
 export SERVER_ROOT_NAME=webapps
 export APPLICATION_NAME=fullstack
 export PROJECT_NAME=backend
@@ -32,6 +33,11 @@ export SERVER_ROOT_PATH=/${SERVER_ROOT_NAME}
 export APPLICATION_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}
 export VIRTUALENV_PATH=${APPLICATION_PATH}/virtualenv
 export PROJECT_PATH=${APPLICATION_PATH}/${PROJECT_NAME}
+
+### End project variables ###
+
+# Changing anything after this point will affect the behavior of the functions below. Do not modify.
+ENVIRONMENTS=core,dev,prod
 
 setup() {
     vagrant halt && vagrant destroy -f && vagrant up
