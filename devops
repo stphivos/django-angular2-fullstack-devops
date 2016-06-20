@@ -78,7 +78,7 @@ build() {
     backend)
         build_backend ${env}
         ;;
-    *) echo
+    *)
         build_frontend ${env}
         build_backend ${env}
        ;;
@@ -126,7 +126,7 @@ EOF
     cd provisioning/terraform/frontend/${TF_VAR_app_env}
     terraform get
     terraform apply
-    cd ../../
+    cd ../../../../
 }
 
 deploy_core() {
@@ -144,7 +144,7 @@ deploy_core() {
     cd provisioning/terraform/core
     terraform apply
     terraform output | ${pipe} tfvars --o core.tfvars
-    cd ../../
+    cd ../../../
 }
 
 deploy_backend() {
@@ -164,7 +164,7 @@ deploy_backend() {
     terraform get
     # TODO: Check packer tfvars and core tfvars files exist
     terraform apply -var-file="packer.tfvars" -var-file="../../core/core.tfvars"
-    cd ../../
+    cd ../../../../
 }
 
 deploy_rds() {
@@ -185,7 +185,7 @@ deploy_rds() {
         tee /dev/tty | \
         grep -E -o "db_instance_address = .+$" | \
         perl -ne '@parts = split /[=,\s]+/, $_; print "{\"db_host\"" .": \"" . $parts[1] . "\"}\n"' > ${vars}
-    cd ../../
+    cd ../../../../
 }
 
 deploy() {
@@ -212,7 +212,7 @@ deploy() {
     rds)
         deploy_rds ${env}
         ;;
-    *) echo
+    *)
         deploy_core
         deploy_rds ${env}
         deploy_backend ${env}
@@ -249,13 +249,13 @@ destroy() {
         cd ../../core
         echo "Destroying core..."
         terraform destroy -force
+        cd ../../../
     else
         cd provisioning/terraform/${project}/${env}
         echo "Destroying $env ${project}..."
         terraform destroy -force
+        cd ../../../../
     fi
-
-    cd ../../../
 }
 
 # call arguments verbatim:
