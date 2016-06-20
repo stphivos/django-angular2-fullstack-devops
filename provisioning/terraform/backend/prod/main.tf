@@ -10,6 +10,44 @@ variable "aws_region" {
   default = "<dynamic>"
 }
 
+variable "instance_type" {
+  default = "<dynamic>"
+}
+
+variable "user" {
+  default = "<dynamic>"
+}
+
+variable "aws_zone_id" {
+  default = "<dynamic>"
+}
+
+variable "key_name" {
+  default = "<dynamic>"
+}
+
+variable "public_key_path" {
+  default = "<dynamic>"
+}
+
+variable "private_key_path" {
+  default = "<dynamic>"
+}
+
+variable "aws_amis" {
+  default = {
+    eu-central-1 = "<dynamic>"
+  }
+}
+
+variable "subnet_id" {
+  default = "<dynamic>"
+}
+
+variable "vpc_id" {
+  default = "<dynamic>"
+}
+
 provider "aws" {
   region = "${var.aws_region}"
 }
@@ -19,4 +57,12 @@ module "base" {
   app_env = "${var.app_env}"
   app_name = "${var.app_name}"
   aws_region = "${var.aws_region}"
+  instance_type = "${var.instance_type}"
+  user = "${var.user}"
+  aws_zone_id = "${var.aws_zone_id}"
+  key_name = "${var.key_name}"
+  private_key_path = "${var.private_key_path}"
+  aws_ami = "${var.aws_amis.eu-central-1}"
+  subnet_id = "${var.subnet_id}"
+  vpc_id = "${var.vpc_id}"
 }

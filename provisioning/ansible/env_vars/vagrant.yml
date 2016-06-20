@@ -5,6 +5,8 @@ env_user: vagrant
 
 
 # Database settings.
+db_name: "{{ application_name }}"
+db_user: "{{ application_name }}"
 db_password: "!qwerty1"
 db_host: "10.10.10.10"
 db_port: 5432

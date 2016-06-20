@@ -1,9 +1,5 @@
 ---
 
-# Database settings.
-db_name: "{{ application_name }}"
-db_user: "{{ application_name }}"
-
 ssl_crt: |
   -----BEGIN CERTIFICATE-----
   MIIDjjCCAnYCCQCVswRnL7PPezANBgkqhkiG9w0BAQUFADCBiDELMAkGA1UEBhMC

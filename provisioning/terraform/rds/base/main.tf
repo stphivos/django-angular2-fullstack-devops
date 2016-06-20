@@ -2,6 +2,7 @@ provider "aws" {
   region = "${var.aws_region}"
 }
 
+// ##### Remove the following and reuse from core
 resource "aws_vpc" "default" {
   cidr_block = "10.0.0.0/16"
   # TODO: Remove the following after setup to prevent internet access to db instances
@@ -33,9 +34,10 @@ resource "aws_subnet" "subnet_2" {
   availability_zone = "${var.aws_region}b"
   map_public_ip_on_launch = true
 }
+// ##### End remove
 
 resource "aws_db_subnet_group" "default" {
-  name = "${var.app_name}_${var.app_env}_subnet_group"
+  name = "${var.app_name}_subnet_group_${var.app_env}"
   description = "Our main group of subnets"
   subnet_ids = [
     "${aws_subnet.subnet_1.id}",
@@ -43,7 +45,7 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_security_group" "default" {
-  name = "${var.app_name}_sg_rds"
+  name = "${var.app_name}_sg_rds_${var.app_env}"
   description = "Used in the terraform"
   vpc_id = "${aws_vpc.default.id}"
 
@@ -80,10 +82,10 @@ resource "aws_db_instance" "default" {
   allocated_storage = "${var.storage}"
   engine = "${var.engine}"
   engine_version = "${lookup(var.engine_version, var.engine)}"
-  instance_class = "${var.instance_class}"
+  instance_class = "db.${var.instance_class}"
   name = "${var.db_name}"
-  username = "${var.username}"
-  password = "${var.password}"
+  username = "${var.db_username}"
+  password = "${var.db_password}"
   vpc_security_group_ids = [
     "${aws_security_group.default.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.default.id}"

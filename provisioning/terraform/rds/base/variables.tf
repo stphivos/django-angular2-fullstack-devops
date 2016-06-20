@@ -1,31 +1,31 @@
 variable "aws_region" {
   description = "AWS region to launch servers."
-  default = "eu-central-1"
+  default = "<dynamic>"
 }
 
 variable "app_name" {
   description = "Name of the app to provision"
-  default = "fullstack"
+  default = "<dynamic>"
 }
 
 variable "app_env" {
   description = "Name of the app environment to provision"
-  default = "dev"
+  default = "<dynamic>"
 }
 
 variable "identifier" {
-  default = "fullstack-rds"
   description = "Identifier for your DB"
+  default = "fullstack-rds"
 }
 
 variable "storage" {
-  default = "10"
   description = "Storage size in GB"
+  default = "10"
 }
 
 variable "engine" {
-  default = "postgres"
   description = "Engine type, example values mysql, postgres"
+  default = "postgres"
 }
 
 variable "engine_version" {
@@ -37,22 +37,21 @@ variable "engine_version" {
 }
 
 variable "instance_class" {
-  default = "db.t2.micro"
   description = "Instance class"
+  default = "<dynamic>"
 }
 
 variable "db_name" {
-  default = "fullstack"
-  description = "db name"
+  description = "Database name"
+  default = "<dynamic>"
 }
 
-variable "username" {
-  default = "fullstack"
-  description = "User name"
+variable "db_username" {
+  description = "Database username"
+  default = "<dynamic>"
 }
 
-variable "password" {
-  description = "Password"
-  default = "!qwerty1"
-  # TODO: Provide through ENV variables
+variable "db_password" {
+  description = "Database password"
+  default = "<dynamic>"
 }
