@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # General
-export ENVIRONMENTS=dev,prod
+export ENVIRONMENTS=core,dev,prod
 export SERVER_ROOT_NAME=webapps
 export APPLICATION_NAME=fullstack
 export PROJECT_NAME=backend
@@ -197,6 +197,11 @@ deploy() {
         return 1;
     fi
 
+    if [[ ${env} == "core" ]]; then
+        deploy_core
+        return 0;
+    fi
+
     case "$project" in
     frontend)
         deploy_frontend ${env}
@@ -206,9 +211,6 @@ deploy() {
         ;;
     rds)
         deploy_rds ${env}
-        ;;
-    core)
-        deploy_core
         ;;
     *) echo
         deploy_core
