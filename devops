@@ -207,7 +207,11 @@ deploy() {
     rds)
         deploy_rds ${env}
         ;;
+    core)
+        deploy_core
+        ;;
     *) echo
+        deploy_core
         deploy_rds ${env}
         deploy_backend ${env}
         deploy_frontend ${env}
