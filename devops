@@ -181,7 +181,7 @@ deploy_rds() {
 
     cd provisioning/terraform/rds/${TF_VAR_app_env}
     terraform get
-    terraform apply | \
+    terraform apply -var-file="../../core/core.tfvars" | \
         tee /dev/tty | \
         grep -E -o "db_instance_address = .+$" | \
         perl -ne '@parts = split /[=,\s]+/, $_; print "{\"db_host\"" .": \"" . $parts[1] . "\"}\n"' > ${vars}
