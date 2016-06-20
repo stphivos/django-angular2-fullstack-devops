@@ -2,52 +2,18 @@ provider "aws" {
   region = "${var.aws_region}"
 }
 
-// ##### Remove the following and reuse from core
-resource "aws_vpc" "default" {
-  cidr_block = "10.0.0.0/16"
-  # TODO: Remove the following after setup to prevent internet access to db instances
-  enable_dns_hostnames = true
-}
-
-# Create an internet gateway to give our subnet access to the outside world
-resource "aws_internet_gateway" "default" {
-  vpc_id = "${aws_vpc.default.id}"
-}
-
-# Grant the VPC internet access on its main route table
-resource "aws_route" "internet_access" {
-  route_table_id = "${aws_vpc.default.main_route_table_id}"
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id = "${aws_internet_gateway.default.id}"
-}
-
-resource "aws_subnet" "subnet_1" {
-  vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "${var.aws_region}a"
-  map_public_ip_on_launch = true
-}
-
-resource "aws_subnet" "subnet_2" {
-  vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "10.0.2.0/24"
-  availability_zone = "${var.aws_region}b"
-  map_public_ip_on_launch = true
-}
-// ##### End remove
-
 resource "aws_db_subnet_group" "default" {
   name = "${var.app_name}_subnet_group_${var.app_env}"
   description = "Our main group of subnets"
   subnet_ids = [
-    "${aws_subnet.subnet_1.id}",
-    "${aws_subnet.subnet_2.id}"]
+    "${var.default_subnet_id}",
+    "${var.secondary_subnet_id}"]
 }
 
 resource "aws_security_group" "default" {
   name = "${var.app_name}_sg_rds_${var.app_env}"
   description = "Used in the terraform"
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "${var.vpc_id}"
 
   # ssh access
   ingress {

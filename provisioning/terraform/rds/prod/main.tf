@@ -1,3 +1,15 @@
+variable "vpc_id" {
+  default = "<dynamic>"
+}
+
+variable "default_subnet_id" {
+  default = "<dynamic>"
+}
+
+variable "secondary_subnet_id" {
+  default = "<dynamic>"
+}
+
 variable "app_env" {
   default = "<dynamic>"
 }
@@ -32,6 +44,10 @@ provider "aws" {
 
 module "base" {
   source = "../base"
+
+  vpc_id = "${var.vpc_id}"
+  default_subnet_id = "${var.default_subnet_id}"
+  secondary_subnet_id = "${var.secondary_subnet_id}"
   app_env = "${var.app_env}"
   app_name = "${var.app_name}"
   aws_region = "${var.aws_region}"

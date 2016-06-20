@@ -1,19 +1,16 @@
 variable "app_name" {
   description = "Name of the app to provision"
-  default = "fullstack"
-  # TODO: Get app_name from environment variables
+  default = "<dynamic>"
 }
 
 variable "app_env" {
   description = "Name of the app environment to provision"
-  default = "dev"
-  # TODO: Get app_env from environment variables
+  default = "<dynamic>"
 }
 
 variable "aws_region" {
   description = "AWS region to launch servers."
-  default = "eu-central-1"
-  # TODO: Get region from environment variables
+  default = "<dynamic>"
 }
 
 variable "aws_env_domains" {
@@ -35,6 +32,5 @@ variable "aws_s3_zones" {
 
 variable "aws_zone_id" {
   description = "Route53 Hosted Zone resource id."
-  default = "Z3BXIXH96UUDRV"
-  # TODO: Get zone id from environment variables
+  default = "<dynamic>"
 }

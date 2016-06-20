@@ -1,3 +1,13 @@
+variable "vpc_id" {
+  description = "VPC id"
+  default = "<dynamic>"
+}
+
+variable "default_subnet_id" {
+  description = "Default subnet id"
+  default = "<dynamic>"
+}
+
 variable "app_name" {
   description = "Name of the app to provision"
   default = "<dynamic>"
@@ -48,15 +58,5 @@ variable "aws_env_domains" {
 
 variable "aws_zone_id" {
   description = "Route53 Hosted Zone resource id."
-  default = "<dynamic>"
-}
-
-variable "subnet_id" {
-  description = "Subnet id"
-  default = "<dynamic>"
-}
-
-variable "vpc_id" {
-  description = "VPC id"
   default = "<dynamic>"
 }

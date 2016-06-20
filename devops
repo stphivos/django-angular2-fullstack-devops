@@ -89,6 +89,9 @@ deploy_frontend() {
     echo "Deploying $1 frontend..."
 
     export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_aws_zone_id=${ROUTE_53_ZONE_ID}
 
     env=${TF_VAR_app_env}
     if [ ${env} == "prod" ]; then env=www; fi  # Use www sub-domain instead of env for production
@@ -120,7 +123,8 @@ EOF
     # TODO: Frontend dev env responds with 404 for js files
     aws s3 cp frontend/dist/${TF_VAR_app_env}/ s3://${bucket} --recursive
 
-    cd provisioning/terraform/frontend
+    cd provisioning/terraform/frontend/${TF_VAR_app_env}
+    terraform get
     terraform apply
     cd ../../
 }
@@ -209,6 +213,43 @@ deploy() {
         deploy_frontend ${env}
        ;;
     esac
+}
+
+destroy() {
+    env=$1
+    project=$2
+
+    if [[ -z ${env} ]]; then
+        destroy dev
+        destroy prod
+        return 0
+    fi
+
+    export TF_VAR_app_env=${env}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_public_key_path=${SSH_PUBLIC_KEY_PATH}
+
+    if [[ -z ${project} ]]; then
+        cd provisioning/terraform/frontend/${env}
+        echo "Destroying $env frontend..."
+        terraform destroy -force
+        cd ../../backend/${env}
+        echo "Destroying $env backend..."
+        terraform destroy -force
+        cd ../../rds/${env}
+        echo "Destroying $env rds..."
+        terraform destroy -force
+        cd ../../core
+        echo "Destroying core..."
+        terraform destroy -force
+    else
+        cd provisioning/terraform/${project}/${env}
+        echo "Destroying $env ${project}..."
+        terraform destroy -force
+    fi
+
+    cd ../../../
 }
 
 # call arguments verbatim:

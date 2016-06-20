@@ -1,3 +1,18 @@
+variable "vpc_id" {
+  description = "VPC id"
+  default = "<dynamic>"
+}
+
+variable "default_subnet_id" {
+  description = "Default subnet id"
+  default = "<dynamic>"
+}
+
+variable "secondary_subnet_id" {
+  description = "Secondary subnet id"
+  default = "<dynamic>"
+}
+
 variable "aws_region" {
   description = "AWS region to launch servers."
   default = "<dynamic>"

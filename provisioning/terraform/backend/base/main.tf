@@ -66,7 +66,7 @@ resource "aws_elb" "web" {
   name = "${var.app_name}-elb-web-${var.app_env}"
 
   subnets = [
-    "${var.subnet_id}"]
+    "${var.default_subnet_id}"]
   security_groups = [
     "${aws_security_group.elb.id}"]
   instances = [
@@ -118,5 +118,5 @@ resource "aws_instance" "web" {
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
   # backend instances.
-  subnet_id = "${var.subnet_id}"
+  subnet_id = "${var.default_subnet_id}"
 }
