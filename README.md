@@ -41,9 +41,10 @@ The following are needed for building and deploying your infrastructure:
 ```bash
 $ git clone https://github.com/stphivos/django-angular2-fullstack-compact
 $ cd django-angular2-fullstack-compact
-$ vim devops  # Edit project variables based on your project
-$ ./devops setup  # Equivalent to `vagrant up` the first time, except that it destroys and re-creates the machine
-$ vagrant ssh  # Log into the virtual machine. See all vagrant commands: https://www.vagrantup.com/docs/cli/
+
+$ vim vars          # Edit project variables based on your project
+$ ./devops setup    # Equivalent to `vagrant up` the first time, except that it destroys and re-creates the machine
+$ vagrant ssh       # Log into the virtual machine. See all vagrant commands: https://www.vagrantup.com/docs/cli/
 ```
 
 ## Run
@@ -96,12 +97,12 @@ $ ./devops deploy dev frontend  # Uses aws-cli to upload the frontend static fil
 
 Rebuild and deploy frontend for prod environment:
 ```bash
-$ ./devops pipeline dev frontend  # ~30 seconds
+$ ./devops pipeline prod frontend  # ~30 seconds
 ```
 
 Rebuild and deploy backend for prod environment:
 ```bash
-$ ./devops pipeline dev backend  # ~8 minutes
+$ ./devops pipeline prod backend  # ~8 minutes
 ```
 
 ## Credits
