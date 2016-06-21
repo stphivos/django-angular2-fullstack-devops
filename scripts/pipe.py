@@ -3,19 +3,24 @@
 from __future__ import print_function
 
 from argparse import ArgumentParser
+from json import dumps
 from re import sub
 from sys import stdin
 
 
 def tfvars(lines):
     data = []
-    for x in lines:
-        data.append(sub('= ', '= "', x) + '"')
+    for line in lines:
+        data.append(sub('= ', '= "', line) + '"')
     return '\n'.join(data) + '\n'
 
 
 def json(lines):
-    raise NotImplementedError()
+    data = {}
+    for line in lines:
+        pair = [x.strip() for x in line.split('=')]
+        data[pair[0]] = pair[1]
+    return dumps(data, indent=4) + '\n'
 
 
 def output(data, filename):
