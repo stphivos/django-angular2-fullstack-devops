@@ -1,0 +1,9 @@
+---
+
+- include: webservers.yml
+  vars:
+    update_apt_cache: yes
+
+- include: dbservers.yml
+  vars:
+    update_apt_cache: yes

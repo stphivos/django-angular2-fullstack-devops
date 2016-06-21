@@ -1,0 +1,295 @@
+#!/bin/sh -e
+
+### Project variables ###
+
+# General
+export SERVER_ROOT_NAME=webapps
+export APPLICATION_NAME=fullstack
+export PROJECT_NAME=backend
+
+# AWS
+export REGION=eu-central-1
+export INSTANCE_TYPE=t2.micro
+export SOURCE_AMI=ami-9cee02f3
+export ROOT_DOMAIN=pstylianides.com
+export ROUTE_53_ZONE_ID=Z3BXIXH96UUDRV
+
+# RDS
+export DB_NAME=${APPLICATION_NAME}
+export DB_USERNAME=${APPLICATION_NAME}
+export DB_PASSWORD=!qwerty1
+export DB_PORT=5432
+
+# Git
+export GIT_REPO=git@github.com:stphivos/django-angular2-fullstack-compact.git
+export GIT_BRANCH=dev
+
+# Server
+export SSH_USERNAME=ubuntu
+export SSH_KEY_NAME=${APPLICATION_NAME}
+export SSH_PRIVATE_KEY_PATH=~/.ssh/${APPLICATION_NAME}.pem
+export SSH_PUBLIC_KEY_PATH=~/.ssh/${APPLICATION_NAME}.pub
+export SERVER_ROOT_PATH=/${SERVER_ROOT_NAME}
+export APPLICATION_PATH=${SERVER_ROOT_PATH}/${APPLICATION_NAME}
+export VIRTUALENV_PATH=${APPLICATION_PATH}/virtualenv
+export PROJECT_PATH=${APPLICATION_PATH}/${PROJECT_NAME}
+
+### End project variables ###
+
+# Changing anything after this point will affect the behavior of the functions below. Do not modify.
+ENVIRONMENTS=core,dev,prod
+
+setup() {
+    vagrant halt && vagrant destroy -f && vagrant up
+}
+
+build_frontend() {
+    echo "Building $1 frontend..."
+
+    cd frontend
+    gulp build.$1 --color
+    cd ../
+}
+
+build_backend() {
+    echo "Building $1 backend..."
+
+    export ENVIRONMENT=${1}
+    export INVENTORY_LIMIT=web
+
+    vars=$(pwd)"/provisioning/terraform/backend/${ENVIRONMENT}/packer.tfvars"
+    cd provisioning/packer
+
+    # TODO: Check rds vars json file exists
+    packer build -var-file="${ENVIRONMENT}.rds.json" pack.json | \
+    tee /dev/tty | \
+    grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
+    perl -ne '@parts = split /[:,\s]+/, $_; print "aws_amis." . $parts[0] ." = \"" . $parts[1] . "\"\n"' > ${vars}
+    cd ../../
+}
+
+build() {
+    env=$1
+    project=$2
+
+    if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
+        echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
+        return 1;
+    fi
+
+    case "$project" in
+    frontend)
+        build_frontend ${env}
+        ;;
+    backend)
+        build_backend ${env}
+        ;;
+    *)
+        build_frontend ${env}
+        build_backend ${env}
+       ;;
+    esac
+}
+
+deploy_frontend() {
+    echo "Deploying $1 frontend..."
+
+    export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_aws_zone_id=${ROUTE_53_ZONE_ID}
+
+    env=${TF_VAR_app_env}
+    if [ ${env} == "prod" ]; then env=www; fi  # Use www sub-domain instead of env for production
+    bucket=${env}.${ROOT_DOMAIN}
+
+    if [ $(aws s3api list-buckets | grep -o \"${bucket}\") ]; then
+        echo "Create bucket ${bucket} skipped."
+    else
+        aws s3api create-bucket --bucket ${bucket} --region ${REGION} --create-bucket-configuration LocationConstraint=${REGION}
+
+        cat > /tmp/policy <<EOF
+{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Sid":"PublicReadGetObject",
+    "Effect":"Allow",
+    "Principal": "*",
+    "Action":["s3:GetObject"],
+    "Resource":["arn:aws:s3:::${bucket}/*"]
+  }]
+}
+EOF
+
+    policy=$(cat /tmp/policy)
+    aws s3api put-bucket-policy --bucket ${bucket} --policy "$policy"
+    aws s3 website s3://${bucket}/ --index-document index.html
+    fi
+
+    # TODO: Frontend dev env responds with 404 for js files
+    aws s3 cp frontend/dist/${TF_VAR_app_env}/ s3://${bucket} --recursive
+
+    cd provisioning/terraform/frontend/${TF_VAR_app_env}
+    terraform get
+    terraform apply
+    cd ../../../../
+}
+
+deploy_core() {
+    echo "Deploying core..."
+
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_instance_type=${INSTANCE_TYPE}
+    export TF_VAR_aws_zone_id=${ROUTE_53_ZONE_ID}
+    export TF_VAR_key_name=${SSH_KEY_NAME}
+    export TF_VAR_public_key_path=${SSH_PUBLIC_KEY_PATH}
+    export TF_VAR_private_key_path=${SSH_PRIVATE_KEY_PATH}
+
+    pipe=$(pwd)"/scripts/pipe.py"
+    cd provisioning/terraform/core
+    terraform apply
+    terraform output | ${pipe} tfvars --o core.tfvars
+    cd ../../../
+}
+
+deploy_backend() {
+    echo "Deploying $1 backend..."
+
+    export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_instance_type=${INSTANCE_TYPE}
+    export TF_VAR_user=${SSH_USERNAME}
+    export TF_VAR_aws_zone_id=${ROUTE_53_ZONE_ID}
+    export TF_VAR_key_name=${SSH_KEY_NAME}
+    export TF_VAR_public_key_path=${SSH_PUBLIC_KEY_PATH}
+    export TF_VAR_private_key_path=${SSH_PRIVATE_KEY_PATH}
+
+    cd provisioning/terraform/backend/${TF_VAR_app_env}
+    terraform get
+    # TODO: Check packer tfvars and core tfvars files exist
+    terraform apply -var-file="packer.tfvars" -var-file="../../core/core.tfvars"
+    cd ../../../../
+}
+
+deploy_rds() {
+    echo "Deploying $1 rds..."
+
+    export TF_VAR_app_env=${1}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_db_name=${DB_NAME}
+    export TF_VAR_db_username=${DB_USERNAME}
+    export TF_VAR_db_password=${DB_PASSWORD}
+    export TF_VAR_instance_class=${INSTANCE_TYPE}
+
+    vars=$(pwd)"/provisioning/packer/${TF_VAR_app_env}.rds.json"
+    pipe=$(pwd)"/scripts/pipe.py"
+
+    cd provisioning/terraform/rds/${TF_VAR_app_env}
+    terraform get
+    terraform apply -var-file="../../core/core.tfvars"
+    terraform output -module=base | ${pipe} json --o ${vars}
+    cd ../../../../
+}
+
+deploy() {
+    env=$1
+    project=$2
+
+    if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
+        echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
+        return 1;
+    fi
+
+    if [[ ${env} == "core" ]]; then
+        deploy_core
+        return 0;
+    fi
+
+    case "$project" in
+    frontend)
+        deploy_frontend ${env}
+        ;;
+    backend)
+        deploy_backend ${env}
+        ;;
+    rds)
+        deploy_rds ${env}
+        ;;
+    *)
+        deploy_core
+        deploy_rds ${env}
+        deploy_backend ${env}
+        deploy_frontend ${env}
+       ;;
+    esac
+}
+
+destroy() {
+    env=$1
+    project=$2
+
+    if [[ -z ${env} ]]; then
+        destroy dev
+        destroy prod
+        return 0
+    fi
+
+    export TF_VAR_app_env=${env}
+    export TF_VAR_aws_region=${REGION}
+    export TF_VAR_app_name=${APPLICATION_NAME}
+    export TF_VAR_public_key_path=${SSH_PUBLIC_KEY_PATH}
+
+    if [[ -z ${project} ]]; then
+        cd provisioning/terraform/frontend/${env}
+        echo "Destroying $env frontend..."
+        terraform destroy -force
+        cd ../../backend/${env}
+        echo "Destroying $env backend..."
+        terraform destroy -force
+        cd ../../rds/${env}
+        echo "Destroying $env rds..."
+        terraform destroy -force
+        cd ../../core
+        echo "Destroying core..."
+        terraform destroy -force
+        cd ../../../
+    else
+        cd provisioning/terraform/${project}/${env}
+        echo "Destroying $env ${project}..."
+        terraform destroy -force
+        cd ../../../../
+    fi
+}
+
+pipeline() {
+    env=$1
+    project=$2
+
+    if [[ ! ${ENVIRONMENTS} =~ ${env} ]]; then
+        echo "Argument 'env' must be one of: ${ENVIRONMENTS}";
+        return 1;
+    fi
+
+    case "$project" in
+    frontend)
+        build_frontend ${env}
+        deploy_frontend ${env}
+        ;;
+    backend)
+        build_backend ${env}
+        deploy_backend ${env}
+        ;;
+    *)
+        build_frontend ${env}
+        deploy_frontend ${env}
+        build_backend ${env}
+        deploy_backend ${env}
+       ;;
+    esac
+}
+
+# call arguments verbatim:
+$@

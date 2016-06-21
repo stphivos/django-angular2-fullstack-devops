@@ -10,8 +10,8 @@ class UnitTestProfile(BaseUnitTestCase):
         model = self.prepare_model(Profile)
 
         values = {
-            'created': model.created,
-            'modified': model.modified,
+            'created': self.format_date(model.created),
+            'modified': self.format_date(model.modified),
             'user': model.user_id
         }
         fields = values.keys()

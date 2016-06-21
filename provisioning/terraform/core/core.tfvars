@@ -1,0 +1,5 @@
+aws_route_internet_access_id = "r-rtb-82f6faeb1080289494"
+default_subnet_id = "subnet-1ed0c977"
+internet_gateway_id = "igw-cd32afa4"
+secondary_subnet_id = "subnet-d15a6caa"
+vpc_id = "vpc-8bc8ffe2"

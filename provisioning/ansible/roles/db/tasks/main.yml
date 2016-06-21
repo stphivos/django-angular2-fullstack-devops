@@ -1,0 +1,60 @@
+---
+
+- name: Add postgres signing key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: Add postgres apt repo
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main' state=present update_cache=yes
+
+- name: Install postgres
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - python-psycopg2
+    - python-pycurl
+    - locales
+    - "postgresql-{{postgresql_version}}"
+    - "postgresql-contrib-{{postgresql_version}}"
+  tags: packages
+
+- name: Ensure server is listening on all addresses
+  lineinfile: dest=/etc/postgresql/{{postgresql_version}}/main/postgresql.conf
+              regexp="^listen_addresses"
+              line="listen_addresses = '*'" state=present
+  notify:
+    - restart postgresql
+
+- name: Ensure server allows access to host
+  lineinfile: dest=/etc/postgresql/{{postgresql_version}}/main/pg_hba.conf
+              regexp='host\s+all\s+all\s+127.0.0.1/32\s+md5'
+              line='host all all 0.0.0.0/0 md5'
+              insertbefore=BOF
+  notify:
+    - restart postgresql
+
+- meta: flush_handlers
+
+- name: Ensure postgres service is started
+  service: name=postgresql state=started enabled=yes
+
+- name: Ensure database is created
+  become_user: postgres
+  postgresql_db: name={{ db_name }}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 template='template0'
+                 state=present
+
+- name: Ensure user has access to the database
+  become_user: postgres
+  postgresql_user: db={{ db_name }}
+                   name={{ db_user }}
+                   password={{ db_password }}
+                   priv=ALL
+                   state=present
+
+- name: Ensure user does not have unnecessary privileges
+  become_user: postgres
+  postgresql_user: name={{ db_user }}
+                   role_attr_flags=NOSUPERUSER,CREATEDB
+                   state=present

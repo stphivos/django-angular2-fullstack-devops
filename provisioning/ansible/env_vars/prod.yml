@@ -1,0 +1,46 @@
+---
+
+# Project settings.
+env_user: "{{ application_name }}"
+
+
+# Gunicorn settings. For the number of workers, a good rule to follow is
+# 2 x number of CPUs + 1
+gunicorn_num_workers: 3
+
+# Setting this to 1 will restart the Gunicorn process each time
+# you make a request, basically reloading the code. Very handy
+# when developing. Set to 0 for unlimited requests (default).
+gunicorn_max_requests: 0
+
+
+# Nginx settings.
+nginx_server_name: "{{ inventory_hostname }}"
+ssl_dest_dir: /etc/ssl
+
+
+# RabbitMQ settings.
+rabbitmq_server_name: "{{ inventory_hostname }}"
+
+rabbitmq_admin_user: admin
+rabbitmq_admin_password: password  # TODO: Change production rabbitmq_admin_password
+
+rabbitmq_application_vhost: "{{ application_name }}"
+rabbitmq_application_user: "{{ application_name }}"
+rabbitmq_application_password: password  # TODO: Change production rabbitmq_application_password
+
+
+# Celery settings.
+celery_num_workers: 2
+flower_admin_password: password  # TODO: Change production flower_admin_password
+
+
+# Application settings.
+django_settings_file: "{{ project_name }}.settings.prod"
+django_secret_key: "y_w+5ku5d^i^h_l0%0%#8d#9^&-7$ea+ld@kcm77+ouf=j8#*4"  # TODO: Change production django_secret_key
+django_requirements_file: "{{ project_path }}/requirements/requirements.txt"
+
+broker_url: "amqp://{{ rabbitmq_application_user }}:{{ rabbitmq_application_password }}@localhost/{{ rabbitmq_application_vhost }}"
+
+run_django_db_migrations: yes
+run_django_collectstatic: yes

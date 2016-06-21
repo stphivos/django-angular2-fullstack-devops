@@ -1,0 +1,74 @@
+{
+  "variables": {
+    "environment": "{{env `ENVIRONMENT`}}",
+    "region": "{{env `REGION`}}",
+    "instance_type": "{{env `INSTANCE_TYPE`}}",
+    "source_ami": "{{env `SOURCE_AMI`}}",
+    "ssh_username": "{{env `SSH_USERNAME`}}",
+    "git_repo": "{{env `GIT_REPO`}}",
+    "git_branch": "{{env `GIT_BRANCH`}}",
+    "server_root_path": "{{env `SERVER_ROOT_PATH`}}",
+    "application_name": "{{env `APPLICATION_NAME`}}",
+    "server_root_name": "{{env `SERVER_ROOT_NAME`}}",
+    "project_name": "{{env `PROJECT_NAME`}}",
+    "virtualenv_path": "{{env `VIRTUALENV_PATH`}}",
+    "project_path": "{{env `PROJECT_PATH`}}",
+    "inventory_limit": "{{env `INVENTORY_LIMIT`}}",
+    "db_name": "{{env `DB_NAME`}}",
+    "db_user": "{{env `DB_USERNAME`}}",
+    "db_password": "{{env `DB_PASSWORD`}}",
+    "db_port": "{{env `DB_PORT`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `region`}}",
+      "source_ami": "{{user `source_ami`}}",
+      "instance_type": "{{user `instance_type`}}",
+      "ami_name": "{{user `application_name`}} {{timestamp}}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "tags": {
+        "application": "{{user `application_name`}}",
+        "environment": "{{user `environment`}}"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "../../scripts/setup.sh",
+      "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+    },
+    {
+      "type": "shell",
+      "script": "../../scripts/ansible.sh",
+      "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p {{user `server_root_path`}}",
+        "cd {{user `server_root_path`}}",
+        "ssh-keyscan github.com > /etc/ssh/ssh_known_hosts",
+        "git clone -b {{user `git_branch`}} --single-branch {{user `git_repo`}} {{user `application_name`}}"
+      ],
+      "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "../ansible/remote.yml",
+      "playbook_dir": "../ansible/",
+      "inventory_file": "../ansible/inventories/{{user `environment`}}",
+      "extra_arguments": [
+        "--limit \"{{user `inventory_limit`}}\"",
+        "--extra-vars \"env={{user `environment`}} server_root_name={{user `server_root_name`}} application_name={{user `application_name`}} project_name={{user `project_name`}} db_name={{user `db_name`}} db_user={{user `db_user`}} db_password={{user `db_password`}} db_host={{user `db_instance_address`}} db_port={{user `db_port`}} virtualenv_path={{user `virtualenv_path`}} project_path={{user `project_path`}}\""
+      ]
+    }
+  ]
+}
