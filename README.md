@@ -1,5 +1,5 @@
 # django-angular2-fullstack-compact
-All-in-one django/angular2 environment seed with devops cli interface
+All-in-one django/angular2 environment seed with devops cli interface for aws
 
 Save weeks or even months of work!
 
