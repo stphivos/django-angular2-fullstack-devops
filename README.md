@@ -1,5 +1,5 @@
 # django-angular2-fullstack-compact
-All-in-one django/angular2 environment seed with cli interface for devops on aws
+All-in-one django/angular2 environment seed with cli interface for devops on aws using ansible/packer/terraform
 
 Save weeks or even months of work!
 
