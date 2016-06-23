@@ -74,7 +74,7 @@ $ ./devops build dev            # Calls commands below in the order shown
 
 For building a specific project, either of the following can be run separately:
 ```bash
-$ ./devops build dev backend    # Uses packer/ansible to provision an amazon machine image
+$ ./devops build dev backend    # Uses packer/ansible to provision an amazon machine image (ami)
 $ ./devops build dev frontend   # Uses gulp to create a target environment distribution
 ```
 
