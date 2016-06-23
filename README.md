@@ -102,7 +102,7 @@ $ ./devops pipeline prod frontend  # ~30 seconds
 
 Rebuild and deploy backend for prod environment:
 ```bash
-$ ./devops pipeline prod backend  # ~8 minutes
+$ ./devops pipeline prod backend  # ~7 minutes
 ```
 
 ## Credits
