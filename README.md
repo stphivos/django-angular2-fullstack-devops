@@ -39,8 +39,8 @@ The following are needed for building and deploying your infrastructure:
 
 ## Setup
 ```bash
-$ git clone https://github.com/stphivos/django-angular2-fullstack-compact
-$ cd django-angular2-fullstack-compact
+$ git clone https://github.com/stphivos/django-angular2-fullstack-devops
+$ cd django-angular2-fullstack-devops
 
 $ vim vars          # Edit project variables based on your project
 $ ./devops setup    # Equivalent to `vagrant up` the first time, except that it destroys and re-creates the machine
