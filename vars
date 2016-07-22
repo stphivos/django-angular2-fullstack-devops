@@ -8,7 +8,7 @@ export GIT_REPO=git@github.com:stphivos/django-angular2-fullstack-devops.git
 export GIT_BRANCH=dev
 
 # AWS
-export REGION=eu-central-1
+export REGION=$(aws configure get region)
 export INSTANCE_TYPE=t2.micro
 export SOURCE_AMI=ami-9cee02f3
 export ROOT_DOMAIN=pstylianides.com

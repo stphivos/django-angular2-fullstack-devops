@@ -11,6 +11,9 @@ build_frontend() {
     echo "Building $1 frontend..."
 
     cd frontend
+    if [ ! -d "node_modules" ]; then
+        npm install        
+    fi
     gulp build.$1 --color
     cd ../
 }
