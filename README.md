@@ -28,6 +28,7 @@ Save weeks or even months of work!
 * Django REST Framework 3.3
 
 ## Requirements
+* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), [GitHub SSH](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
 * [Vagrant](https://www.vagrantup.com/docs/installation)
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
