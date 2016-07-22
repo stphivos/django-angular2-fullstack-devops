@@ -31,12 +31,13 @@ Save weeks or even months of work!
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), [GitHub SSH](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
 * [Vagrant](https://www.vagrantup.com/docs/installation)
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+* [Node.js](https://nodejs.org/en/download/)
 
 The following are needed for building and deploying your infrastructure:
 
 * [Packer](https://www.packer.io/intro/getting-started/setup.html)
 * [Terraform](https://www.terraform.io/intro/getting-started/install.html)
-* [AWS Account](https://aws.amazon.com)
+* [AWS Account](https://aws.amazon.com), [AWS Settings](docs/aws.md)
 
 ## Setup
 ```bash
