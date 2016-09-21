@@ -30,7 +30,7 @@ build_backend() {
     # TODO: Check rds vars json file exists
     packer build -var-file="${ENVIRONMENT}.rds.json" pack.json | \
     tee /dev/tty | \
-    grep -E -o '\w{2}-\w+-\d{1}: ami-\w+' | \
+    grep -E -o '\w{2}-\w+-\w{1}: ami-\w+' | \
     perl -ne '@parts = split /[:,\s]+/, $_; print "aws_amis." . $parts[0] ." = \"" . $parts[1] . "\"\n"' > ${vars}
     cd ../../
 }
