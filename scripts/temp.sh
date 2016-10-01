@@ -1,3 +1,5 @@
+# ***** NOT IN USE *****
+# TODO: Remove this script after moving all configurations to ansible
 #!/bin/sh -e
 
 APP_NAME=backend  # db name, virtual env name, django settings name, django default db settings

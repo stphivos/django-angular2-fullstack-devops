@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 echo "Add ansible software sources"
 apt-get install -y software-properties-common
