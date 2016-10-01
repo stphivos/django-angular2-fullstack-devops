@@ -5,7 +5,7 @@ export SERVER_ROOT_NAME=webapps
 export APPLICATION_NAME=fullstack
 export PROJECT_NAME=backend
 export GIT_REPO=git@github.com:stphivos/django-angular2-fullstack-devops.git
-export GIT_BRANCH=dev
+export GIT_BRANCH=master
 
 # AWS
 export REGION=$(aws configure get region)
