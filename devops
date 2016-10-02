@@ -1,7 +1,16 @@
 #!/bin/bash -e
 
-source vars
 ENVIRONMENTS=core,dev,prod
+
+is_installed() {
+    if command -v $1 >/dev/null 2>&1; then return 0; else return 1; fi
+}
+
+if ! is_installed "pip"; then ./scripts/tools.sh "pip"; fi
+if ! is_installed "aws"; then ./scripts/tools.sh "aws"; fi
+if ! is_installed "ansible"; then ./scripts/tools.sh "ansible"; fi
+
+source vars
 
 setup() {
     vagrant halt && vagrant destroy -f && vagrant up
