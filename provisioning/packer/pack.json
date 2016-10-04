@@ -47,7 +47,7 @@
     },
     {
       "type": "shell",
-      "script": "../../scripts/ansible.sh",
+      "script": "../../scripts/tools.sh",
       "execute_command": "echo '' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
     },
     {
