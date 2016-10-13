@@ -221,20 +221,25 @@ destroy() {
     if [[ -z ${project} ]]; then
         cd provisioning/terraform/frontend/${env}
         echo "Destroying $env frontend..."
+        terraform get
         terraform destroy -force
         cd ../../backend/${env}
         echo "Destroying $env backend..."
+        terraform get
         terraform destroy -force
         cd ../../rds/${env}
         echo "Destroying $env rds..."
+        terraform get
         terraform destroy -force
         cd ../../core
         echo "Destroying core..."
+        terraform get
         terraform destroy -force
         cd ../../../
     else
         cd provisioning/terraform/${project}/${env}
         echo "Destroying $env ${project}..."
+        terraform get
         terraform destroy -force
         cd ../../../../
     fi
